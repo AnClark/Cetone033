@@ -227,8 +227,25 @@ void CCetone033::InitParameters()
 
     memcpy(this->OldPrograms, PresetData, sizeof(SynthProgramOld) * 128);
 
+    // AnClark FIX: Cetone033 set illegal parameters when loading plugin.
+    //              (e.g. pVolume set to 3.100000)
+#if 0
     for (int i = 0; i < 128; i++)
         this->ImportProgram(&OldPrograms[i], &Programs[i]);
+#else   // Write programs with valid default values. René forgot to do this...
+	for(int i = 0; i < 128; i++)
+	{
+		char tmp[64], tmp2[64];
+
+		vst_strncpy(tmp, "Cetone033 #", 63);
+		sprintf(tmp2, "%u", i + 1);
+		vst_strncat(tmp, tmp2, 63);
+		
+		vst_strncpy(this->Programs[i].Name, tmp, 63);
+
+		this->WriteProgram(i);
+	}
+#endif
 
     this->ReadProgram(0);
 
