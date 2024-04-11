@@ -32,10 +32,10 @@ dpf_add_plugin (${PROJECT_NAME}
         src/Cetone033Plugin.cpp
         src/PresetData.cpp
         ${SRC_BACKEND}
-    #FILES_UI
-    #    src/CetoneUI.cpp
-    #    src/CetoneUIHelper.cpp
-    #    src/Images/CetoneArtwork.cpp
-    #    src/Fonts/CetoneFonts.cpp
+    FILES_UI
+        src/CetoneUI.cpp
+        src/CetoneUIHelper.cpp
+        src/Images/CetoneArtwork.cpp
+        src/Fonts/CetoneFonts.cpp 
 )
 
