@@ -1,6 +1,10 @@
 #pragma once
 
+#ifdef __WIN32
 #define UNDENORM(v) if((*(unsigned __int32*)&v & 0x7f800000) == 0) v = 0.0f
+#else
+#define UNDENORM(v) if((*(uint32_t*)&v & 0x7f800000) == 0) v = 0.0f
+#endif
 
 #define FILTER_DELAY 256
 
