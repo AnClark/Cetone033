@@ -5,11 +5,11 @@
 
 #include "defines.h"
 #include "globalfunctions.h"
-#include "midistack.h"
+#include "MidiStack.h"
 #include "structures.h"
-#include "synthoscillator.h"
+#include "SynthOscillator.h"
 
-#include "cetonelpfilter.h"
+#include "CetoneLpFilter.h"
 
 class CCetone033 : public DISTRHO::Plugin {
 public:

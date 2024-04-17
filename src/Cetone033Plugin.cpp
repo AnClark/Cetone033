@@ -1,7 +1,7 @@
 #include <math.h>
 
 // #include "aeffguieditor.h"
-#include "cetone033.h"
+#include "Cetone033.h"
 
 extern bool TablesBuilt;
 

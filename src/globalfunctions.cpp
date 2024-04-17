@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string>
 
-#include "cetone033.h"
+#include "Cetone033.h"
 
 void wave2str(int wave, char* text)
 {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "filtermoog.h"
-#include "filterbiquad.h"
+#include "FilterMoog.h"
+#include "FilterBiquad.h"
 
 class CCetoneLpFilter
 {

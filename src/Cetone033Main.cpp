@@ -1,6 +1,6 @@
 #include <math.h>
 
-#include "cetone033.h"
+#include "Cetone033.h"
 
 void CCetone033::process(float** inputs, float** outputs, VstInt32 sampleFrames)
 {
