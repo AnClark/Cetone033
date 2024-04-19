@@ -15,7 +15,8 @@ void CCetone033::processReplacing(float** inputs, float** outputs, VstInt32 samp
 void CCetone033::SynthProcess(float** inputs, float** outputs, VstInt32 sampleFrames, bool replace)
 {
 	// AnClark MOD: Cetone033 is a mono synthesizer. I will fill the 2 channels with the same samples
-    float* out = outputs[0] = outputs[1];
+    float* out_L = outputs[0];
+    float* out_R = outputs[1];
 
     int    p0, p1, p2, delta, tdelta = 0;
     float  output;
@@ -207,10 +208,14 @@ void CCetone033::SynthProcess(float** inputs, float** outputs, VstInt32 sampleFr
 
         ****************************************************************************/
 
-        if (replace)
-            (*out++) = output;
-        else
-            (*out++) += output;
+        if (replace) {
+            (*out_L++) = output;
+            (*out_R++) = output;
+        }
+        else {
+            (*out_L++) += output;
+            (*out_R++) += output;
+        }
 
         sampleFrames--;
         tdelta++;
