@@ -2,6 +2,28 @@
 #include "FilterMoog.h"
 #include <math.h>
 
+static inline void _input_signal_sanitizer(float& val)
+{
+    // Check for illegal sample data value: NaN or out-of-bound.
+    // Then replace the error value with a fallback one.
+    //
+    // This sanitizer is adapted from Minaton-XT (https://github.com/AnClark/Minaton-XT).
+
+    if (isnan(val)) {
+        // The most common situation is getting an NaN
+        val = -0.984375;
+    } else if (val <= -1.25f) {
+        // The second common one is out of left boundary
+        val = -0.984375;
+    } else if (val >= 1.25f) {
+        // Out of right boundary.
+        val = 0.984375;
+    } else {
+        // No problem. Keep it as-is.
+        return;
+    }
+}
+
 CFilterMoog::CFilterMoog(void)
 {
 	this->Reset();
@@ -52,6 +74,8 @@ void CFilterMoog::Set(float cutoff, float q)
 
 float CFilterMoog::Run(float val)
 {
+	_input_signal_sanitizer(val);
+
     float x = val - this->r * this->y4;
 
     this->y1 = x * this->p + this->oldx * this->p - this->k * this->y1;
