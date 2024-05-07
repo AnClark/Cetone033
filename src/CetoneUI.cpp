@@ -59,6 +59,14 @@ CCetoneUI::CCetoneUI()
     /* Initialize switches */
     _createSwitchButton(fBtnClipState, pClipState, 536, 68);
     _createSwitchButton(fBtnGlideState, pGlideState, 536, 178);
+
+#ifdef ENABLE_PRESET_MENU
+    _initFactoryBank();
+    _initPresetMenu();
+
+    //for (auto i = 0; i < 10; i++)
+    //    d_stderr("Preset #%d: %s", i, fFactoryPresets[i].Name);
+#endif
 }
 
 void CCetoneUI::parameterChanged(uint32_t index, float value)

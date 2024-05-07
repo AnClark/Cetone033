@@ -4,6 +4,14 @@
 #include "ImageWidgets.hpp"
 #include "NanoVG.hpp"
 
+#ifdef ENABLE_PRESET_MENU
+#include "structures.h"
+
+#include "MenuWidget.hpp"
+
+using DISTRHO::MenuWidget;
+#endif
+
 using DGL_NAMESPACE::ImageAboutWindow;
 using DGL_NAMESPACE::ImageButton;
 using DGL_NAMESPACE::ImageKnob;
@@ -19,6 +27,9 @@ class CCetoneUI : public DISTRHO::UI,
                   public ImageKnob::Callback,
                   public ImageSlider::Callback,
                   public ImageSwitch::Callback,
+#ifdef ENABLE_PRESET_MENU
+                  public MenuWidget::Callback,
+#endif
                   public IdleCallback {
 public:
     CCetoneUI();
@@ -47,6 +58,15 @@ protected:
     // Other Callbacks
 
     void idleCallback() override;
+
+#if ENABLE_PRESET_MENU
+    // -------------------------------------------------------------------
+    // Menu Callbacks - only for preset menu
+
+    void menuItemSelected(const int id) override;
+    bool onMouse(const MouseEvent& ev) override;
+    bool onMotion(const MotionEvent& ev) override;
+#endif
 
 private:
     // -------------------------------------------------------------------
@@ -101,6 +121,18 @@ private:
     int _c_val2pw(float value);
     int _c_val2modAmount(float value);
     int _c_val2modMul(float value);
+
+#ifdef ENABLE_PRESET_MENU
+    // -------------------------------------------------------------------
+    // Factory preset access
+
+    SynthProgramOld fFactoryPresets[128];
+    ScopedPointer<MenuWidget> fPresetMenu;
+
+    void _initFactoryBank();
+    void _initPresetMenu();
+    void _loadPreset(uint32_t presetId);
+#endif   
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CCetoneUI)
 };

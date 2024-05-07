@@ -10,6 +10,9 @@ set (CMAKE_CXX_STANDARD 17)
 
 add_subdirectory (dpf)
 
+option (CONFIG_ENABLE_PRESET_MENU "Enable factory preset menu so that you can access official factory banks in plugin editor" ON)
+message (STATUS "Cetone033 Factory Preset menu support: ${CONFIG_ENABLE_PRESET_MENU}")
+
 include_directories (   
     src/
 )
@@ -30,12 +33,24 @@ dpf_add_plugin (${PROJECT_NAME}
         src/Cetone033DPF.cpp
         src/Cetone033Main.cpp
         src/Cetone033Plugin.cpp
-        src/PresetData.cpp
         ${SRC_BACKEND}
     FILES_UI
         src/CetoneUI.cpp
         src/CetoneUIHelper.cpp
         src/images/CetoneArtwork.cpp
-        src/Fonts/CetoneFonts.cpp 
+        src/Fonts/CetoneFonts.cpp
+    FILES_COMMON
+        src/PresetData.cpp
 )
 
+if (CONFIG_ENABLE_PRESET_MENU)
+    target_compile_definitions (${PROJECT_NAME}-ui PRIVATE ENABLE_PRESET_MENU=1)
+
+    target_sources (${PROJECT_NAME}-ui PRIVATE
+        ext/WolfWidgets/MenuWidget.cpp
+        ext/WolfWidgets/WolfWidget.cpp
+        ext/WolfWidgets/Margin.cpp
+        src/CetoneUIMenu.cpp
+    )
+    target_include_directories (${PROJECT_NAME}-ui PRIVATE ext/WolfWidgets/)
+endif ()

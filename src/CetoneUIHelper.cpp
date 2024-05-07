@@ -124,3 +124,74 @@ int CCetoneUI::_c_val2modMul(float value)
 {
     return floorf(value * 100.f + 0.5f);
 }
+
+#ifdef ENABLE_PRESET_MENU
+extern unsigned char PresetData[];
+
+inline float c_coarse2val(int value)
+{
+	return (float)(value + 50) / 100.f;
+}
+
+inline float c_fine2val(int value)
+{
+	return (float)(value + 100) / 200.f;
+}
+
+inline float c_bool2val(bool value)
+{
+	return (value) ? 1.f : 0.f;
+}
+
+void CCetoneUI::_initFactoryBank()
+{
+    // Copy preset data to structure
+    memcpy(this->fFactoryPresets, PresetData, sizeof(SynthProgramOld) * 128);
+}
+
+#define APPLY_PARAM(id, val) \
+    setParameterValue(id, val); /* Apply parameter */ \
+    parameterChanged(id, val);  /* Update UI display */
+
+void CCetoneUI::_loadPreset(uint32_t presetId)
+{
+    DISTRHO_SAFE_ASSERT(presetId >= 0 && presetId < 128)
+
+    const SynthProgramOld &currentPreset = fFactoryPresets[presetId];
+
+    APPLY_PARAM(pOsc1Coarse, c_coarse2val(currentPreset.Coarse[0]));
+    APPLY_PARAM(pOsc1Fine, c_fine2val(currentPreset.Fine[0]));
+    APPLY_PARAM(pOsc1Wave, _pi2f(currentPreset.Wave[0], WAVE_MAX));
+    APPLY_PARAM(pOsc1Morph, currentPreset.Morph[0]);
+    APPLY_PARAM(pOsc1Volume, currentPreset.Volume[0]);
+
+    APPLY_PARAM(pOsc2Fine, c_fine2val(currentPreset.Fine[1]));
+    APPLY_PARAM(pOsc2Coarse, c_coarse2val(currentPreset.Coarse[1]));
+    APPLY_PARAM(pOsc2Wave, _pi2f(currentPreset.Wave[1], WAVE_MAX));
+    APPLY_PARAM(pOsc2Morph, currentPreset.Morph[1]);
+    APPLY_PARAM(pOsc2Volume, currentPreset.Volume[1]);    
+
+    APPLY_PARAM(pVolume, currentPreset.MainVolume > 1.0f ? 0.5f : currentPreset.MainVolume);
+    APPLY_PARAM(pClipState, c_bool2val(currentPreset.ClipState));
+
+    APPLY_PARAM(pEnv1Attack, currentPreset.Attack[0]);
+    APPLY_PARAM(pEnv1Decay, currentPreset.Decay[0]);
+
+    APPLY_PARAM(pEnv2Attack, currentPreset.Attack[1]);
+    APPLY_PARAM(pEnv2Decay, currentPreset.Decay[1]);
+
+    APPLY_PARAM(pModEnv, currentPreset.ModEnv);
+    APPLY_PARAM(pModRes, currentPreset.ModRes);
+    APPLY_PARAM(pModVel, currentPreset.ModVel);
+
+    APPLY_PARAM(pCutoff, currentPreset.Cutoff);
+    APPLY_PARAM(pResonance, currentPreset.Resonance);
+    APPLY_PARAM(pFilterType, 0);    // Filter type is not defined in factory preset
+
+    APPLY_PARAM(pGlideState, c_bool2val(currentPreset.GlideState));
+    APPLY_PARAM(pGlideSpeed, currentPreset.GlideSpeed);
+
+    d_stderr("Loaded preset #%d: %s", presetId, currentPreset.Name);
+}
+
+#endif
