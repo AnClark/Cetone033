@@ -24,6 +24,15 @@ void CCetone033::initParameter(uint32_t index, Parameter& parameter)
     }
 }
 
+void CCetone033::initProgramName(uint32_t index, String& programName)
+{
+    DISTRHO_SAFE_ASSERT(index >= 0 && index < 128)
+
+    char buffer[kVstMaxProgNameLen + 1];
+    getProgramNameIndexed(0, index, buffer);
+    programName = String(buffer);
+}
+
 float CCetone033::getParameterValue(uint32_t index) const
 {
     return this->getParameter(index);
@@ -32,6 +41,13 @@ float CCetone033::getParameterValue(uint32_t index) const
 void CCetone033::setParameterValue(uint32_t index, float value)
 {
     this->setParameter(index, value);
+}
+
+void CCetone033::loadProgram(uint32_t index)
+{
+    DISTRHO_SAFE_ASSERT(index >= 0 && index < 128)
+
+    setProgram(index);
 }
 
 void CCetone033::activate()

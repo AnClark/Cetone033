@@ -154,6 +154,11 @@ void CCetoneUI::parameterChanged(uint32_t index, float value)
     repaint();
 }
 
+void CCetoneUI::programLoaded(uint32_t index)
+{
+    repaint();
+}
+
 // -------------------------------------------------------------------
 // Widget Callbacks
 
