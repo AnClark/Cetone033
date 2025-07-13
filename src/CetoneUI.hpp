@@ -4,6 +4,8 @@
 #include "ImageWidgets.hpp"
 #include "NanoVG.hpp"
 
+#include "Widgets/ImGui_UI.hpp"
+
 using DGL_NAMESPACE::ImageAboutWindow;
 using DGL_NAMESPACE::ImageButton;
 using DGL_NAMESPACE::ImageKnob;
@@ -56,11 +58,18 @@ private:
     char fLabelBuffer[32 + 1];
 
     // -------------------------------------------------------------------
+    // Dear ImGui Instance
+
+    ScopedPointer<ImGuiUI> fImGuiInstance;
+    friend class ImGuiUI;
+
+    // -------------------------------------------------------------------
     // Image resources
 
     Image fImgBackground;
     Image fImgKnob;
     Image fImgSwitchButton_ON, fImgSwitchButton_OFF;
+    Image fImgTransparent;
 
     // -------------------------------------------------------------------
     // Widgets
@@ -84,12 +93,21 @@ private:
     ScopedPointer<ImageSwitch> fBtnClipState, fBtnGlideState;
 
     // -------------------------------------------------------------------
+    // Buttons
+
+    ScopedPointer<ImageButton> fBtnAbout;
+
+    ScopedPointer<ImageButton> fBtnOsc1Waveform, fBtnOsc2Waveform;
+    ScopedPointer<ImageButton> fBtnFilterType;
+
+    // -------------------------------------------------------------------
     // Helpers
 
     void _createKnob(ScopedPointer<ImageKnob>& knob, uint32_t paramId, uint absolutePosX, uint absolutePosY, float defaultValue, uint rotationAngle = 275);
     void _createSlider(ScopedPointer<ImageSlider>& slider, uint32_t paramId, uint startPosX, uint startPosY, uint endPosX, uint endPosY, float step, bool inverted = false);
     void _createSwitchButton(ScopedPointer<ImageSwitch>& switchButton, uint32_t paramId, uint absolutePosX, uint absolutePosY);
     void _createButton(ScopedPointer<ImageButton>& button, uint id, Image& imageNormal, Image& imagePressed, uint absolutePosX, uint absolutePosY);
+    void _createHiddenButton(ScopedPointer<ImageButton>& button, uint id, Size<uint> size, Point<int> absolutePos);
 
     const char* _wave2Str(int wave);
     const char* _filterType2Str(int type);  // Equals CCetoneLpFilter::Name()
@@ -111,5 +129,6 @@ private:
 // Button IDs
 
 constexpr uint BTN_PANIC = d_cconst('p', 'n', 'i', 'c');
+constexpr uint BTN_ABOUT = d_cconst('a', 'b', 't', '.');
 
 // -----------------------------------------------------------------------
