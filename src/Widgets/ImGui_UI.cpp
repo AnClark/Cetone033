@@ -109,6 +109,34 @@ void ImGuiUI::onImGuiDisplay()
         if (ImGui::MenuItem("Moogle (Moog)")) { _triggerParamUpdate(pFilterType, ui->_pi2f(FILTER_TYPE_MOOG, FILTER_TYPE_MAX)); }
         ImGui::EndPopup();
     }
+    
+    //
+    // Toolbar
+    //
+    // TIPS:
+    // By adding a Dear ImGui window without border and decorations, we can add any Dear ImGui widgets to our plugin UI,
+    // without relying on a standard Dear ImGui window.
+    //
+
+    // Set the size and location of toolbar area
+    ImGui::SetNextWindowPos(ImVec2(100, 5));
+    ImGui::SetNextWindowSize(ImVec2(100, 20));
+
+    // Set window padding to zero
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+    // Create a window as the "container" of ImGui widgets. This window has no backgrounds and decorations, and not moveable.
+    ImGui::Begin("Toolbar", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar);
+    {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0x3c / 255.0f, 0x9e / 255.0f, 0x3c / 255.0f, 1.0f));
+
+        ImGui::Button("Test Button", ImVec2(100, 20));
+
+        ImGui::PopStyleColor();
+    }
+    ImGui::End();
+
+    ImGui::PopStyleVar();
 }
 
 void ImGuiUI::_triggerParamUpdate(uint32_t paramId, float newValue)
