@@ -4,6 +4,8 @@
 #include "ImageWidgets.hpp"
 #include "NanoVG.hpp"
 
+#include "Widgets/ImGui_UI.hpp"
+
 using DGL_NAMESPACE::ImageAboutWindow;
 using DGL_NAMESPACE::ImageButton;
 using DGL_NAMESPACE::ImageKnob;
@@ -56,6 +58,12 @@ private:
     char fLabelBuffer[32 + 1];
 
     // -------------------------------------------------------------------
+    // Dear ImGui Instance
+
+    ScopedPointer<ImGuiUI> fImGuiInstance;
+    friend class ImGuiUI;
+
+    // -------------------------------------------------------------------
     // Image resources
 
     Image fImgBackground;
@@ -83,6 +91,14 @@ private:
     ScopedPointer<ImageKnob> fFilterCutoff, fFilterResonance, fFilterType;
 
     ScopedPointer<ImageSwitch> fBtnClipState, fBtnGlideState;
+
+    // -------------------------------------------------------------------
+    // Buttons
+
+    ScopedPointer<ImageButton> fBtnAbout;
+
+    ScopedPointer<ImageButton> fBtnOsc1Waveform, fBtnOsc2Waveform;
+    ScopedPointer<ImageButton> fBtnFilterType;
 
     // -------------------------------------------------------------------
     // Helpers
@@ -113,5 +129,6 @@ private:
 // Button IDs
 
 constexpr uint BTN_PANIC = d_cconst('p', 'n', 'i', 'c');
+constexpr uint BTN_ABOUT = d_cconst('a', 'b', 't', '.');
 
 // -----------------------------------------------------------------------
