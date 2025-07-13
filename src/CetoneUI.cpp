@@ -60,6 +60,18 @@ CCetoneUI::CCetoneUI()
     /* Initialize switches */
     _createSwitchButton(fBtnClipState, pClipState, 536, 68);
     _createSwitchButton(fBtnGlideState, pGlideState, 536, 178);
+
+    /* ImGui instance (popup menus, subwindows, etc.) */
+    fImGuiInstance = new ImGuiUI(getTopLevelWidget(), this);
+
+    /* "About" button (by clicking the plugin logo) */
+    _createHiddenButton(fBtnAbout, BTN_ABOUT, Size<uint>(80, 25), Point<int>(0, 0));
+
+    /* Popup menu button on params which has constant value sets */
+    _createHiddenButton(fBtnOsc1Waveform, pOsc1Wave, Size<uint>(45, 10 + 2), Point<int>(10 + 48 * 2, 124 - 4));
+    _createHiddenButton(fBtnOsc2Waveform, pOsc2Wave, Size<uint>(45, 10 + 2), Point<int>(274 + 48 * 2, 124 - 4));
+
+    _createHiddenButton(fBtnFilterType, pFilterType, Size<uint>(45, 10 + 2), Point<int>(382 + 48 * 2, 234 - 4));
 }
 
 void CCetoneUI::parameterChanged(uint32_t index, float value)
@@ -160,14 +172,34 @@ void CCetoneUI::parameterChanged(uint32_t index, float value)
 
 void CCetoneUI::imageButtonClicked(ImageButton* button, int)
 {
-#if 0
-    switch (button->getId()) {
-    case BTN_PANIC: {
-        panic();
-        break;
+    DISTRHO_SAFE_ASSERT_RETURN(fImGuiInstance, )
+
+    switch (button->getId())
+    {
+        case BTN_ABOUT:
+        {
+            fImGuiInstance->isAboutWindowOpen = !fImGuiInstance->isAboutWindowOpen;
+            break;
+        }
+        case pOsc1Wave:
+        {
+            fImGuiInstance->menuPos = ImVec2(fBtnOsc1Waveform->getAbsolutePos().getX(), fBtnOsc1Waveform->getAbsolutePos().getY() + fBtnOsc1Waveform->getHeight());
+            fImGuiInstance->requestMenuId = pOsc1Wave;
+            break;
+        }
+        case pOsc2Wave:
+        {
+            fImGuiInstance->menuPos = ImVec2(fBtnOsc2Waveform->getAbsolutePos().getX(), fBtnOsc2Waveform->getAbsolutePos().getY() + fBtnOsc2Waveform->getHeight());
+            fImGuiInstance->requestMenuId = pOsc2Wave;
+            break;
+        }
+        // NOTICE: For those buttons below, no need to specify menu position. Let Dear ImGui decide menu's position.
+        case pFilterType:
+        {
+            fImGuiInstance->requestMenuId = pFilterType;
+            break;
+        }
     }
-    }
-#endif
 }
 
 void CCetoneUI::imageSwitchClicked(ImageSwitch* button, bool down)
