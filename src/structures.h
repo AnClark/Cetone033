@@ -92,3 +92,14 @@ struct SynthProgram
 	bool ClipState;
 	float MainVolume;
 };
+
+// DPF-specific preset structure.
+//
+// Each parameter conforms to VST 2.4 standard (param range is [0.0f, 1.0f]),
+// for easily interact with AnClark's plugin implementation, which uses the same range.
+struct SynthPreset_DPF
+{
+	char Name[128];
+
+	float Parameter[pParameters];
+};

@@ -19,7 +19,6 @@ set (SRC_BACKEND
     src/CetoneLpFilter.cpp
     src/FilterBiquad.cpp
     src/FilterMoog.cpp
-    src/globalfunctions.cpp
     src/MidiStack.cpp
     src/SynthOscillator.cpp
 )
@@ -39,7 +38,9 @@ dpf_add_plugin (${PROJECT_NAME}
         src/Fonts/CetoneFonts.cpp 
         dpf-widgets/opengl/DearImGui.cpp
         src/Widgets/ImGui_UI.cpp
+        src/PresetManager.cpp
     FILES_COMMON
         src/PresetData.cpp
+        src/globalfunctions.cpp
 )
 

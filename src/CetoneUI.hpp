@@ -6,6 +6,8 @@
 
 #include "Widgets/ImGui_UI.hpp"
 
+#include "PresetManager.hpp"
+
 using DGL_NAMESPACE::ImageAboutWindow;
 using DGL_NAMESPACE::ImageButton;
 using DGL_NAMESPACE::ImageKnob;
@@ -62,6 +64,11 @@ private:
 
     ScopedPointer<ImGuiUI> fImGuiInstance;
     friend class ImGuiUI;
+
+    // -------------------------------------------------------------------
+    // Preset manager
+
+    ScopedPointer<CetonePresetManager> fPresetManager;
 
     // -------------------------------------------------------------------
     // Image resources

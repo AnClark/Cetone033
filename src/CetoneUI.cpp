@@ -7,6 +7,8 @@
 namespace Art   = CetoneArtwork;
 namespace Fonts = CetoneFonts;
 
+extern unsigned char PresetData[];
+
 CCetoneUI::CCetoneUI()
     : DISTRHO::UI(Art::guiWidth, Art::guiHeight)
     , fImgBackground(Art::guiData, Art::guiWidth, Art::guiHeight, kImageFormatBGR)
@@ -19,6 +21,20 @@ CCetoneUI::CCetoneUI()
     NanoVG::FontId font = fNanoText.createFontFromMemory("Source Sans Regular", Fonts::SourceSans3_RegularData, Fonts::SourceSans3_RegularDataSize, false);
     fNanoText.fontFaceId(font);
     memset(fLabelBuffer, '\0', sizeof(char) * (32 + 1));
+
+    /* Initialize preset manager */
+    fPresetManager = new CetonePresetManager();
+    fPresetManager->LoadFactoryPrograms(PresetData);
+    for (int i = 0; i < 11; i++)
+    {
+        d_stderr("PReset #%d: %s, Osc1 Vol = (%f, %f), Main Vol = %f",
+                                                i,
+                                                fPresetManager->GetFactoryProgram(i).Name,
+                                                fPresetManager->GetFactoryProgram(i).Volume[0],
+                                                fPresetManager->GetFactoryProgram(i).Volume[1],
+                                                fPresetManager->GetFactoryProgram(i).MainVolume
+                );
+    }
 
     /* Initialize knobs */
     // NOTICE: Default values comes from CCetoneSynth::InitSynthParameters().
