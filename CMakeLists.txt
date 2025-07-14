@@ -31,7 +31,6 @@ dpf_add_plugin (${PROJECT_NAME}
         src/Cetone033DPF.cpp
         src/Cetone033Main.cpp
         src/Cetone033Plugin.cpp
-        src/PresetData.cpp
         ${SRC_BACKEND}
     FILES_UI
         src/CetoneUI.cpp
@@ -40,5 +39,7 @@ dpf_add_plugin (${PROJECT_NAME}
         src/Fonts/CetoneFonts.cpp 
         dpf-widgets/opengl/DearImGui.cpp
         src/Widgets/ImGui_UI.cpp
+    FILES_COMMON
+        src/PresetData.cpp
 )
 
