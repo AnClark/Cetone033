@@ -36,6 +36,7 @@ dpf_add_plugin (${PROJECT_NAME}
     FILES_UI
         src/CetoneUI.cpp
         src/CetoneUIHelper.cpp
+        src/PresetManager.cpp
         src/images/CetoneArtwork.cpp
         src/Fonts/CetoneFonts.cpp 
         dpf-widgets/opengl/DearImGui.cpp

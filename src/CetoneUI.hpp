@@ -5,6 +5,7 @@
 #include "NanoVG.hpp"
 
 #include "Widgets/ImGui_UI.hpp"
+#include "PresetManager.hpp"
 
 using DGL_NAMESPACE::ImageAboutWindow;
 using DGL_NAMESPACE::ImageButton;
@@ -50,6 +51,12 @@ protected:
 
     void idleCallback() override;
 
+public:
+    // -------------------------------------------------------------------
+    // Preset management
+
+    //SynthPreset_DPF exportPreset();
+
 private:
     // -------------------------------------------------------------------
     // Label renderer
@@ -62,6 +69,11 @@ private:
 
     ScopedPointer<ImGuiUI> fImGuiInstance;
     friend class ImGuiUI;
+
+    // -------------------------------------------------------------------
+    // Preset Manager stuff
+
+    friend class PresetManager; // Allow PresetManager to access internal methods / vars
 
     // -------------------------------------------------------------------
     // Image resources
