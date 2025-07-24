@@ -3,6 +3,7 @@
 
 constexpr float PARAM_MIN_VALUE = 0.0f;
 constexpr float PARAM_MAX_VALUE = 1.0f;
+constexpr float PARAM_MAX_VALUE_VOLUME = 1.5f;
 constexpr float PARAM_DEFAULT_VALUE = 0.5f;
 
 void CCetoneUI::_createKnob(ScopedPointer<ImageKnob>& knob, uint32_t paramId, uint absolutePosX, uint absolutePosY, float defaultValue, uint rotationAngle)
@@ -12,11 +13,21 @@ void CCetoneUI::_createKnob(ScopedPointer<ImageKnob>& knob, uint32_t paramId, ui
     knob = new ImageKnob(this, knob_image, ImageKnob::Vertical);
     knob->setId(paramId);
     knob->setAbsolutePos(absolutePosX, absolutePosY);
-    knob->setRange(PARAM_MIN_VALUE, PARAM_MAX_VALUE);
     knob->setDefault(defaultValue);
     knob->setValue(defaultValue);
     knob->setRotationAngle(rotationAngle);
     knob->setCallback(this);
+
+    switch (paramId) {
+    case pOsc1Volume:
+    case pOsc2Volume:
+    case pVolume:
+        knob->setRange(PARAM_MIN_VALUE, PARAM_MAX_VALUE_VOLUME);
+        break;
+
+    default:
+        knob->setRange(PARAM_MIN_VALUE, PARAM_MAX_VALUE);
+    }
 }
 
 void CCetoneUI::_createSlider(ScopedPointer<ImageSlider>& slider, uint32_t paramId, uint startPosX, uint startPosY, uint endPosX, uint endPosY, float step, bool inverted)

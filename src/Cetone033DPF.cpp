@@ -4,10 +4,25 @@ void CCetone033::initParameter(uint32_t index, Parameter& parameter)
 {
     parameter.hints |= kParameterIsAutomatable;
 
-    // Fallback to classic VST 2.4 param range (0.0 ~ 1.0), to fit with Cetone's own param handlers.
-    parameter.ranges.min = 0.0f;
-    parameter.ranges.max = 1.0f;
-    parameter.ranges.def = getParameter(index);
+    switch (index) {
+    case pOsc1Volume:
+    case pOsc2Volume:
+    case pVolume:
+        // For volume parameters, param values are factors for calculating amplifier parameters.
+        // They are not limited to range of 0.0 ~ 1.0, but up to 2.0 to allow boost,
+        // which is the original plugin's behavior (some factory patches do).
+        parameter.ranges.min = 0.0f;
+        parameter.ranges.max = 1.5f;    // Allow 50% boost
+        parameter.ranges.def = getParameter(index);
+        break;
+
+    default:
+        // For other parameters, fallback to classic VST 2.4 param range (0.0 ~ 1.0),
+        // to fit with Cetone's own param handlers.
+        parameter.ranges.min = 0.0f;
+        parameter.ranges.max = 1.0f;
+        parameter.ranges.def = getParameter(index);
+    }
 
     // Must set parameter.symbol, this is the unique ID of each parameter.
     // If not set, you can neither save presets nor reset to factory default, in VST3 and CLAP!
