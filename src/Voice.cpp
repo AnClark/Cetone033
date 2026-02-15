@@ -46,10 +46,24 @@ void CVoice::NoteOn(int note, int velocity, float sampleRate, float modChangeSam
                     int coarse0, int fine0, int coarse1, int fine1,
                     float morph0, float morph1, int wave0, int wave1,
                     float resonance, bool glideState, float glideSpeed,
-                    int lastPitch, bool hasLastPitch)
+                    int lastPitch, bool hasLastPitch, bool isPolyphonic)
 {
 	int  tmp;
 	bool glide = (glideState && (glideSpeed != 0.f) && hasLastPitch) ? true : false;
+
+	// On polyphony mode, if this voice is being stolen (active AND processing a different note), reset filter state
+	// This avoids clicks from filter buffer contamination during voice stealing
+	//
+	// WARNING: We should preserve filter continuity in monophonic legato playing,
+	//          otherwise it would cause unwanted clicks when playing legato!
+	//          This is why the parameter "isPolyphonic" is needed: to distinguish monophonic note stealing (legato)
+	//          vs true polyphonic voice stealing.
+	if (isPolyphonic && (this->Active && this->CurrentNote != note)) {
+		this->ResetFilter();
+		// Also reset envelope volumes to match clean filter state
+		this->VoiceVolume[0] = 0.f;
+		this->VoiceVolume[1] = 0.f;
+	}
 
 	this->Active = true;
 	this->Age = 0;

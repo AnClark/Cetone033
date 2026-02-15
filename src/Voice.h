@@ -24,7 +24,7 @@ public:
 	            int coarse0, int fine0, int coarse1, int fine1,
 	            float morph0, float morph1, int wave0, int wave1,
 	            float resonance, bool glideState, float glideSpeed, 
-	            int lastPitch, bool hasLastPitch);
+	            int lastPitch, bool hasLastPitch, bool isPolyphonic);
 	void NoteOff();
 
 	// Audio processing

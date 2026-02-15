@@ -338,7 +338,7 @@ void CCetone033::NoteOn(int note, int vel)
                      this->Coarse[0], this->Fine[0], this->Coarse[1], this->Fine[1],
                      this->Morph[0], this->Morph[1], this->Wave[0], this->Wave[1],
                      this->Resonance, this->GlideState, this->GlideSpeed,
-                     lastPitch, hasLastPitch);
+                     lastPitch, hasLastPitch, (this->MaxPolyphony > 1));
         
         // Update tracking: save this note's target pitch and voice index
         this->LastNotePitch = (note + NOTE_OFFSET) * 100;
