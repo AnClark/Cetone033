@@ -20,7 +20,7 @@ void        CCetone033::setSampleRate(float fs)
         TablesBuilt = false;
         this->InitFreqTables(fs);
 #ifdef ENABLE_POLYPHONY
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < MAX_POLYPHONY; i++) {
             this->Voices[i]->SetFilterSampleRate(fs);
         }
 #else
@@ -406,7 +406,7 @@ void CCetone033::setParameter(VstInt32 index, float value)
     case pFilterType:
         this->FilterType = p->FilterType = pf2i(value, FILTER_TYPE_MAX);
 #ifdef ENABLE_POLYPHONY
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < MAX_POLYPHONY; i++) {
             this->Voices[i]->SetFilterType(p->FilterType);
         }
 #else
@@ -453,9 +453,9 @@ void CCetone033::setParameter(VstInt32 index, float value)
         break;
 #ifdef ENABLE_POLYPHONY
     case pMaxPolyphony:
-        this->MaxPolyphony = p->MaxPolyphony = (int)(value * 15.f) + 1;
+        this->MaxPolyphony = p->MaxPolyphony = (int)value;
         if (this->MaxPolyphony < 1) this->MaxPolyphony = 1;
-        if (this->MaxPolyphony > 16) this->MaxPolyphony = 16;
+        if (this->MaxPolyphony > MAX_POLYPHONY) this->MaxPolyphony = MAX_POLYPHONY;
         break;
 #endif
     }
@@ -554,8 +554,8 @@ float CCetone033::getParameter(VstInt32 index) const
         break;
 #ifdef ENABLE_POLYPHONY
     case pMaxPolyphony:
-        ret = (float)(p->MaxPolyphony - 1) / 15.f;
-        break;
+        ret = (float)this->MaxPolyphony; // Direct integer value
+        break; 
 #endif
     }
 
