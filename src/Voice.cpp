@@ -200,8 +200,7 @@ float CVoice::Process(float evolume0, float evolume1, float evolume2,
 		c += modEnv * this->VoiceVolume[1] * sampleRateEnv;
 		c += modVel * this->VelocityMod * sampleRateVel;
 		this->DecayResonance *= modResValue;
-		float r = resonance * this->DecayResonance;
-		this->Filter->Set(c, r);
+		this->Filter->Set(c, this->DecayResonance);
 	}
 
 	output = this->Filter->Run(output);
