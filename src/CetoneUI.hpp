@@ -101,6 +101,13 @@ private:
     ScopedPointer<ImageButton> fBtnFilterType;
 
     // -------------------------------------------------------------------
+    // Special parameters' storage (not controlled by knobs and switches)
+
+#ifdef ENABLE_POLYPHONY
+    uint32_t fMaxPolyphony;
+#endif
+
+    // -------------------------------------------------------------------
     // Helpers
 
     void _createKnob(ScopedPointer<ImageKnob>& knob, uint32_t paramId, uint absolutePosX, uint absolutePosY, float defaultValue, uint rotationAngle = 275);
