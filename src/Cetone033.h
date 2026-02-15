@@ -170,7 +170,7 @@ private:
     CSynthOscillator* Oscs[2];
 
 #ifdef ENABLE_POLYPHONY
-    CVoice*           Voices[16];
+    CVoice*           Voices[MAX_POLYPHONY];
     int               MaxPolyphony;
     int               LastVoiceIndex;
     int               LastNotePitch;
