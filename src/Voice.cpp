@@ -87,13 +87,9 @@ void CVoice::NoteOn(int note, int velocity, float sampleRate, float modChangeSam
 
 void CVoice::NoteOff()
 {
-	// For now, immediately deactivate the voice
-	// In a full implementation, you might want to trigger a release envelope
-	this->Active = false;
-	this->EnvPos[0] = -1;
-	this->EnvPos[1] = -1;
-	this->VoiceVolume[0] = 0.f;
-	this->VoiceVolume[1] = 0.f;
+	// Like monophonic mode, do nothing here.
+	// Let the envelopes naturally decay to zero.
+	// The voice will auto-deactivate when both envelopes finish (EnvPos[0] == -1 && EnvPos[1] == -1).
 }
 
 float CVoice::Process(float evolume0, float evolume1, float evolume2,
