@@ -11,6 +11,11 @@
 
 #include "CetoneLpFilter.h"
 
+#ifdef ENABLE_POLYPHONY
+// Forward declaration to avoid circular dependency
+class CVoice;
+#endif
+
 class CCetone033 : public DISTRHO::Plugin {
 public:
     CCetone033();
@@ -164,6 +169,14 @@ private:
 
     CSynthOscillator* Oscs[2];
 
+#ifdef ENABLE_POLYPHONY
+    CVoice*           Voices[16];
+    int               MaxPolyphony;
+    int               LastVoiceIndex;
+    int               LastNotePitch;
+    bool              HasLastNote;
+#endif
+
     SynthProgram      Programs[128];
     SynthProgramOld   OldPrograms[128];
 
@@ -251,4 +264,11 @@ private:
     void  SetResonanceSave(float value);
 
     void  ImportProgram(SynthProgramOld* src, SynthProgram* dest);
+
+#ifdef ENABLE_POLYPHONY
+    CVoice* AllocateVoice(int note, int velocity);
+    CVoice* FindVoice(int note);
+    void    ReleaseVoice(int note);
+    int     FindOldestVoice();
+#endif
 };

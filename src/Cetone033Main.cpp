@@ -2,6 +2,10 @@
 
 #include "Cetone033.h"
 
+#ifdef ENABLE_POLYPHONY
+#include "Voice.h"
+#endif
+
 void CCetone033::process(float** inputs, float** outputs, VstInt32 sampleFrames)
 {
     this->SynthProcess(inputs, outputs, sampleFrames, false);
@@ -59,7 +63,7 @@ void CCetone033::SynthProcess(float** inputs, float** outputs, VstInt32 sampleFr
         else
             this->FilterCounter--;
 
-        // Filter set-safe
+        // Filter set-safe (shared by both modes)
 
         if (this->CutoffStep != 0.f) {
             this->Cutoff += this->CutoffStep;
@@ -76,6 +80,23 @@ void CCetone033::SynthProcess(float** inputs, float** outputs, VstInt32 sampleFr
                 }
             }
         }
+
+#ifdef ENABLE_POLYPHONY
+        // Polyphonic mode: process all active voices
+        for (int v = 0; v < this->MaxPolyphony; v++) {
+            if (this->Voices[v]->IsActive()) {
+                output += this->Voices[v]->Process(
+                    evolume0, evolume1, evolume2,
+                    pitch0, pitch1,
+                    this->AttackFactor[0], this->DecayFactor[0],
+                    this->AttackFactor[1], this->DecayFactor[1],
+                    this->ModEnv, this->ModVel, this->SampleRateEnv, this->SampleRateVel,
+                    this->Cutoff, this->Resonance, this->ModResValue,
+                    this->FilterCounter, this->ClipState);
+            }
+        }
+#else
+        // Monophonic mode: original code
 
         // Velocity mod slide
 
@@ -201,6 +222,7 @@ void CCetone033::SynthProcess(float** inputs, float** outputs, VstInt32 sampleFr
                 output *= s;
             }
         }
+#endif // ENABLE_POLYPHONY
 
         /****************************************************************************
 
@@ -246,8 +268,12 @@ void CCetone033::HandleMidi(int p0, int p1, int p2)
 
     switch (status) {
     case 0x80: // Note off
+#ifdef ENABLE_POLYPHONY
+        this->NoteOff(p1, p2);
+#else
         if (p1 == this->CurrentNote)
             this->NoteOff(p1, p2);
+#endif
         break;
     case 0x90: // Note on
         if (p2 == 0)
@@ -273,7 +299,15 @@ void CCetone033::HandleMidi(int p0, int p1, int p2)
             this->setParameterAutomated(pResonance, (float)p2 / 127.f);
             break;
         case 123:
+#ifdef ENABLE_POLYPHONY
+            for (int i = 0; i < this->MaxPolyphony; i++) {
+                if (this->Voices[i]->IsActive()) {
+                    this->Voices[i]->NoteOff();
+                }
+            }
+#else
             this->CurrentNote = -1;
+#endif
             break;
         }
         break;
@@ -285,6 +319,47 @@ void CCetone033::HandleMidi(int p0, int p1, int p2)
 
 void CCetone033::NoteOn(int note, int vel)
 {
+#ifdef ENABLE_POLYPHONY
+    // Determine starting pitch for glide
+    int lastPitch = this->LastNotePitch;
+    bool hasLastPitch = this->HasLastNote;
+    
+    // If the last voice is still active, use its current (possibly gliding) pitch
+    if (this->LastVoiceIndex >= 0 && this->LastVoiceIndex < this->MaxPolyphony) {
+        CVoice* lastVoice = this->Voices[this->LastVoiceIndex];
+        if (lastVoice->IsActive()) {
+            lastPitch = lastVoice->GetCurrentPitch();
+        }
+    }
+    
+    CVoice* voice = this->AllocateVoice(note, vel);
+    if (voice != nullptr) {
+        voice->NoteOn(note, vel, this->SampleRate, this->ModChangeSamples,
+                     this->Coarse[0], this->Fine[0], this->Coarse[1], this->Fine[1],
+                     this->Morph[0], this->Morph[1], this->Wave[0], this->Wave[1],
+                     this->Resonance, this->GlideState, this->GlideSpeed,
+                     lastPitch, hasLastPitch);
+        
+        // Update tracking: save this note's target pitch and voice index
+        this->LastNotePitch = (note + NOTE_OFFSET) * 100;
+        this->HasLastNote = true;
+        
+        // Find and save this voice's index
+        for (int i = 0; i < this->MaxPolyphony; i++) {
+            if (this->Voices[i] == voice) {
+                this->LastVoiceIndex = i;
+                break;
+            }
+        }
+    }
+    
+    // Increment age for all active voices
+    for (int i = 0; i < this->MaxPolyphony; i++) {
+        if (this->Voices[i]->IsActive()) {
+            this->Voices[i]->IncrementAge();
+        }
+    }
+#else
     int  tmp;
     bool glide = (this->GlideState && (this->GlideSpeed != 0.f) && (this->CurrentNote != -1)) ? true : false;
 
@@ -316,10 +391,16 @@ void CCetone033::NoteOn(int note, int vel)
     this->DecayResonance = this->Resonance;
 
     this->DoGlide = glide;
+#endif
 }
 
 void CCetone033::NoteOff(int note, int vel)
 {
+#ifdef ENABLE_POLYPHONY
+    this->ReleaseVoice(note);
+#else
+    // Original monophonic behavior: do nothing
+#endif
 }
 
 void CCetone033::SetGlideSpeed(float speed)
@@ -373,12 +454,24 @@ void CCetone033::resume()
     this->CutoffStep = 0.f;
     this->ResonanceStep = 0.f;
 
+#ifdef ENABLE_POLYPHONY
+    for (int i = 0; i < this->MaxPolyphony; i++) {
+        this->Voices[i]->ResetFilter();
+        this->Voices[i]->SetFilterType(this->FilterType);
+        this->Voices[i]->SetFilterParams(this->Cutoff, this->Resonance);
+        // Warm up the filter
+        for (int j = 0; j < 4096; j++) {
+            float t = this->Voices[i]->WarmupFilter();
+        }
+    }
+#else
     this->Filter->Reset();
 
     this->Filter->Set(this->Cutoff, this->Resonance);
 
     for (int i = 0; i < 4096; i++)
         float t = this->Filter->Run(0.f);
+#endif
 }
 
 void CCetone033::UpdateEnvelopes()
