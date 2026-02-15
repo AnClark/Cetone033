@@ -8,6 +8,9 @@ project (cetone033
 # Explicitily specify C++ standard to prevent build error on Github CI - macOS build
 set (CMAKE_CXX_STANDARD 17)
 
+# Option to enable polyphony mode
+option (CETONE_ENABLE_POLYPHONY "Enable polyphonic mode (16 voices)" OFF)
+
 add_subdirectory (dpf)
 
 include_directories (   
@@ -23,6 +26,10 @@ set (SRC_BACKEND
     src/MidiStack.cpp
     src/SynthOscillator.cpp
 )
+
+if (CETONE_ENABLE_POLYPHONY)
+    list (APPEND SRC_BACKEND src/Voice.cpp)
+endif()
 
 dpf_add_plugin (${PROJECT_NAME}
     TARGETS vst2 vst3 lv2 clap jack
@@ -42,3 +49,6 @@ dpf_add_plugin (${PROJECT_NAME}
         src/Widgets/ImGui_UI.cpp
 )
 
+if (CETONE_ENABLE_POLYPHONY)
+    target_compile_definitions (${PROJECT_NAME} PUBLIC ENABLE_POLYPHONY)
+endif()

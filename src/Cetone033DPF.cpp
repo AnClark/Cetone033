@@ -21,6 +21,11 @@ void CCetone033::initParameter(uint32_t index, Parameter& parameter)
     case pGlideState:
         parameter.hints |= kParameterIsBoolean;
         break;
+#ifdef ENABLE_POLYPHONY
+    case pMaxPolyphony:
+        parameter.hints |= kParameterIsInteger;
+        break;
+#endif
     }
 }
 
