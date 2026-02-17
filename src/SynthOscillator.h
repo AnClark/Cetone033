@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Cetone033.h"
+// Forward declaration
+class CCetone033;
 
 class CSynthOscillator
 {

@@ -2,6 +2,10 @@
 
 #include "Cetone033.h"
 
+#ifdef ENABLE_POLYPHONY
+#include "Voice.h"
+#endif
+
 bool                 TablesBuilt = false;
 
 extern unsigned char PresetData[];
@@ -37,6 +41,21 @@ CCetone033::CCetone033()
     this->Oscs[0] = new CSynthOscillator();
     this->Oscs[1] = new CSynthOscillator();
 
+#ifdef ENABLE_POLYPHONY
+    for (int i = 0; i < 16; i++) {
+        this->Voices[i] = new CVoice();
+        // Initialize filter for each voice
+        this->Voices[i]->SetFilterSampleRate(44100.f);
+        this->Voices[i]->SetFilterType(FILTER_TYPE_BIQUAD);
+        // Set initial filter parameters
+        this->Voices[i]->SetFilterParams(1.0f, 0.0f);
+    }
+    this->MaxPolyphony = 16;
+    this->LastVoiceIndex = -1;
+    this->LastNotePitch = 0;
+    this->HasLastNote = false;
+#endif
+
     this->InitParameters();
 
     // Explicitly set CetoneSynth's sample rate to fit with DAW's config
@@ -49,6 +68,12 @@ CCetone033::~CCetone033()
     delete this->Filter;
     delete this->Oscs[0];
     delete this->Oscs[1];
+
+#ifdef ENABLE_POLYPHONY
+    for (int i = 0; i < 16; i++) {
+        delete this->Voices[i];
+    }
+#endif
 }
 
 void CCetone033::InitFreqTables(float fs)
@@ -225,6 +250,10 @@ void CCetone033::InitParameters()
 
     this->FilterType = FILTER_TYPE_BIQUAD;
 
+#ifdef ENABLE_POLYPHONY
+    this->MaxPolyphony = 16;
+#endif
+
     memcpy(this->OldPrograms, PresetData, sizeof(SynthProgramOld) * 128);
 
     // AnClark FIX: Cetone033 set illegal parameters when loading plugin.
@@ -298,11 +327,24 @@ void CCetone033::ReadProgram(int prg)
 
     this->FilterType = p->FilterType;
 
+#ifdef ENABLE_POLYPHONY
+    this->MaxPolyphony = p->MaxPolyphony;
+    if (this->MaxPolyphony < 1) this->MaxPolyphony = 1;
+    if (this->MaxPolyphony > 16) this->MaxPolyphony = 16;
+#endif
+
     this->SetGlideSpeed(this->GlideSpeed);
     this->SetGlideState(this->GlideState);
     this->SetModRes(this->ModRes);
     this->UpdateEnvelopes();
+#ifdef ENABLE_POLYPHONY
+    for (int i = 0; i < 16; i++) {
+        this->Voices[i]->SetFilterType(this->FilterType);
+        this->Voices[i]->SetFilterParams(this->Cutoff, this->Resonance);
+    }
+#else
     this->Filter->SetType(this->FilterType);
+#endif
 }
 
 void CCetone033::WriteProgram(int prg)
@@ -333,7 +375,70 @@ void CCetone033::WriteProgram(int prg)
     p->GlideSpeed = this->GlideSpeed;
 
     p->FilterType = this->FilterType;
+
+#ifdef ENABLE_POLYPHONY
+    p->MaxPolyphony = this->MaxPolyphony;
+#endif
 }
+
+#ifdef ENABLE_POLYPHONY
+
+CVoice* CCetone033::AllocateVoice(int note, int velocity)
+{
+    // First, try to find an inactive voice
+    for (int i = 0; i < this->MaxPolyphony; i++) {
+        if (!this->Voices[i]->IsActive()) {
+            return this->Voices[i];
+        }
+    }
+
+    // If no inactive voice found, steal the oldest one
+    int oldestIdx = FindOldestVoice();
+    if (oldestIdx >= 0) {
+        return this->Voices[oldestIdx];
+    }
+
+    // Fallback to first voice
+    return this->Voices[0];
+}
+
+CVoice* CCetone033::FindVoice(int note)
+{
+    for (int i = 0; i < this->MaxPolyphony; i++) {
+        if (this->Voices[i]->IsActive() && this->Voices[i]->GetNote() == note) {
+            return this->Voices[i];
+        }
+    }
+    return nullptr;
+}
+
+void CCetone033::ReleaseVoice(int note)
+{
+    CVoice* voice = FindVoice(note);
+    if (voice != nullptr) {
+        voice->NoteOff();
+    }
+}
+
+int CCetone033::FindOldestVoice()
+{
+    int oldestIdx = -1;
+    int maxAge = -1;
+
+    for (int i = 0; i < this->MaxPolyphony; i++) {
+        if (this->Voices[i]->IsActive()) {
+            int age = this->Voices[i]->GetAge();
+            if (age > maxAge) {
+                maxAge = age;
+                oldestIdx = i;
+            }
+        }
+    }
+
+    return oldestIdx;
+}
+
+#endif // ENABLE_POLYPHONY
 
 START_NAMESPACE_DISTRHO
 

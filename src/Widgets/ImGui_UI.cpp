@@ -109,6 +109,84 @@ void ImGuiUI::onImGuiDisplay()
         if (ImGui::MenuItem("Moogle (Moog)")) { _triggerParamUpdate(pFilterType, ui->_pi2f(FILTER_TYPE_MOOG, FILTER_TYPE_MAX)); }
         ImGui::EndPopup();
     }
+
+    //
+    // Toolbar area - resides at the same line as the title bar, on the right hand side of the logo
+    //
+    if (ImGui::Begin("Main Toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBackground))
+    {
+        ImGui::SetWindowPos(ImVec2(120, -2));
+        ImGui::SetWindowSize(ImVec2(100, 50));
+
+        constexpr ImVec4 _labelColor(25.0f / 255.0f, 132.0f / 255.0f, 25.0f / 255.0f, 1.0f);
+
+
+        // Lambda to apply button style and execute a function with RAII (Resource Acquisition Is Initialization)
+        auto withButtonStyle_Toolbar = [&](auto&& func) {
+            constexpr ImVec4 _buttonColor(50.0f / 255.0f, 158.0f / 255.0f, 56.0f / 255.0f, 1.0f);
+            constexpr ImVec4 _buttonHoverColor(60.0f / 255.0f, 168.0f / 255.0f, 66.0f / 255.0f, 1.0f);
+            constexpr ImVec4 _buttonActiveColor(30.0f / 255.0f, 138.0f / 255.0f, 36.0f / 255.0f, 1.0f);
+
+            ImGui::PushStyleColor(ImGuiCol_Button, _buttonColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, _buttonHoverColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, _buttonActiveColor);
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+            func();
+            ImGui::PopStyleVar();
+            ImGui::PopStyleColor(3);
+        };
+
+#ifdef ENABLE_POLYPHONY
+        // Polyphony switch
+        {
+            ImGui::AlignTextToFramePadding();   // Make text vertically centered with the button
+            ImGui::TextColored(_labelColor, "Poly.");
+
+            ImGui::SameLine(0, 5);
+
+            String _buttonLabel = String(ui->fMaxPolyphony) + "##PolyphonyButton";
+            withButtonStyle_Toolbar([&]() {
+                if (ImGui::Button(_buttonLabel.buffer(), ImVec2(60 - 20, 0)))
+                {
+                    ImGui::OpenPopup("Polyphony Config");
+                }
+            });
+        }
+
+        // Polyphony configuration popup
+        if (ImGui::BeginPopup("Polyphony Config"))
+        {
+            ImGui::SeparatorText("Polyphony Configuration");
+            {
+                ImGui::Text("Max polyphony:");
+                ImGui::Dummy(ImVec2(0, 2));
+
+                if (ImGui::SliderInt("##PolyphonySlider", reinterpret_cast<int*>(&ui->fMaxPolyphony), 1, MAX_POLYPHONY, ui->fMaxPolyphony <= 1 ? "Monopoly" : "%d"))
+                {
+                    _triggerParamUpdate(pMaxPolyphony, static_cast<float>(ui->fMaxPolyphony));
+                }
+            }
+            ImGui::Dummy(ImVec2(0, 2));
+            {
+                if (ImGui::Button("OK", ImVec2(70, 0)))
+                {
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::SameLine(0, 18);
+
+                if (ImGui::Button("Set to Monopoly", ImVec2(120, 0)))
+                {
+                    _triggerParamUpdate(pMaxPolyphony, 1);
+                }
+            }
+
+            ImGui::EndPopup();
+        }
+#endif
+
+        ImGui::End();
+    }
 }
 
 void ImGuiUI::_triggerParamUpdate(uint32_t paramId, float newValue)

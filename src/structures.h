@@ -35,6 +35,10 @@ enum
 
 	pFilterType,
 
+#ifdef ENABLE_POLYPHONY
+	pMaxPolyphony,
+#endif
+
 	pParameters
 };
 
@@ -91,4 +95,8 @@ struct SynthProgram
 
 	bool ClipState;
 	float MainVolume;
+
+#ifdef ENABLE_POLYPHONY
+	int MaxPolyphony;
+#endif
 };
