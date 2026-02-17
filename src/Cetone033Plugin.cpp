@@ -3,6 +3,10 @@
 // #include "aeffguieditor.h"
 #include "Cetone033.h"
 
+#ifdef ENABLE_POLYPHONY
+#include "Voice.h"
+#endif
+
 extern bool TablesBuilt;
 
 VstInt32    CCetone033::getNumMidiInputChannels() { return 1; }
@@ -15,7 +19,13 @@ void        CCetone033::setSampleRate(float fs)
     if (this->SampleRate != fs) {
         TablesBuilt = false;
         this->InitFreqTables(fs);
+#ifdef ENABLE_POLYPHONY
+        for (int i = 0; i < MAX_POLYPHONY; i++) {
+            this->Voices[i]->SetFilterSampleRate(fs);
+        }
+#else
         this->Filter->SetSampleRate(fs);
+#endif
         this->UpdateEnvelopes();
         this->SetGlideSpeed(this->GlideSpeed);
     }
@@ -248,6 +258,11 @@ void CCetone033::getParameterDisplay(VstInt32 index, char* text)
     case pClipState:
         bool2string(p->ClipState, text);
         break;
+#ifdef ENABLE_POLYPHONY
+    case pMaxPolyphony:
+        sprintf(text, "%d", p->MaxPolyphony);
+        break;
+#endif
     }
 }
 
@@ -334,6 +349,11 @@ void CCetone033::getParameterName(VstInt32 index, char* text)
     case pClipState:
         vst_strncpy(text, "Clip", kVstMaxParamStrLen);
         break;
+#ifdef ENABLE_POLYPHONY
+    case pMaxPolyphony:
+        vst_strncpy(text, "Polyphony", kVstMaxParamStrLen);
+        break;
+#endif
     }
 }
 
@@ -385,7 +405,13 @@ void CCetone033::setParameter(VstInt32 index, float value)
         break;
     case pFilterType:
         this->FilterType = p->FilterType = pf2i(value, FILTER_TYPE_MAX);
+#ifdef ENABLE_POLYPHONY
+        for (int i = 0; i < MAX_POLYPHONY; i++) {
+            this->Voices[i]->SetFilterType(p->FilterType);
+        }
+#else
         this->Filter->SetType(p->FilterType);
+#endif
         break;
 
     case pEnv1Attack:
@@ -425,6 +451,13 @@ void CCetone033::setParameter(VstInt32 index, float value)
     case pClipState:
         this->ClipState = p->ClipState = c_val2bool(value);
         break;
+#ifdef ENABLE_POLYPHONY
+    case pMaxPolyphony:
+        this->MaxPolyphony = p->MaxPolyphony = (int)value;
+        if (this->MaxPolyphony < 1) this->MaxPolyphony = 1;
+        if (this->MaxPolyphony > MAX_POLYPHONY) this->MaxPolyphony = MAX_POLYPHONY;
+        break;
+#endif
     }
 
 #if 0
@@ -519,6 +552,11 @@ float CCetone033::getParameter(VstInt32 index) const
     case pClipState:
         ret = c_bool2val(p->ClipState);
         break;
+#ifdef ENABLE_POLYPHONY
+    case pMaxPolyphony:
+        ret = (float)this->MaxPolyphony; // Direct integer value
+        break; 
+#endif
     }
 
     return ret;

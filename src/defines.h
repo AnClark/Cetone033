@@ -40,3 +40,7 @@
 #define WAVE_TRI 2
 
 #define WAVE_MAX 2
+
+#ifdef ENABLE_POLYPHONY
+#define MAX_POLYPHONY 16
+#endif
