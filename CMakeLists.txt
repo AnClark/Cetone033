@@ -10,6 +10,7 @@ set (CMAKE_CXX_STANDARD 17)
 
 # Option to enable polyphony mode
 option (CETONE_ENABLE_POLYPHONY "Enable polyphonic mode (16 voices)" OFF)
+option (CETONE_ALLOW_VOLUME_BOOSTING "Allow volume boosting when polyphony is enabled.\nThis enables output normalization as well, in order to prevent overflow." ON)
 
 add_subdirectory (dpf)
 
@@ -51,4 +52,11 @@ dpf_add_plugin (${PROJECT_NAME}
 
 if (CETONE_ENABLE_POLYPHONY)
     target_compile_definitions (${PROJECT_NAME} PUBLIC ENABLE_POLYPHONY)
+    if (CETONE_ALLOW_VOLUME_BOOSTING)
+        target_compile_definitions (${PROJECT_NAME} PUBLIC ENABLE_VOLUME_BOOSTING)
+        message (STATUS ">>> Polyphony enabled with volume boosting.")
+        message (STATUS ">>>>>> NOTE: Output normalization is active to prevent overflow. <<<<<<")
+    else()
+        message (STATUS ">>> Polyphony enabled with normal volume ranges.")
+    endif()
 endif()

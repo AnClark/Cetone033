@@ -456,6 +456,9 @@ void CCetone033::setParameter(VstInt32 index, float value)
         this->MaxPolyphony = p->MaxPolyphony = (int)value;
         if (this->MaxPolyphony < 1) this->MaxPolyphony = 1;
         if (this->MaxPolyphony > MAX_POLYPHONY) this->MaxPolyphony = MAX_POLYPHONY;
+#ifdef ENABLE_VOLUME_BOOSTING
+        this->PolyphonyGainCompensation = 1.0f / sqrtf((float)this->MaxPolyphony);
+#endif
         break;
 #endif
     }
