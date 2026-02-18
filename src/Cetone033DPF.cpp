@@ -25,6 +25,23 @@ void CCetone033::initParameter(uint32_t index, Parameter& parameter)
 	parameter.ranges.def = getParameter(index);
 #endif
 
+#if defined(ENABLE_POLYPHONY) && defined(ENABLE_VOLUME_BOOSTING)
+    switch (index) {
+    case pOsc1Volume:
+    case pOsc2Volume:
+    case pVolume:
+        // For volume parameters, param values are factors for calculating amplifier parameters.
+        // They are not limited to range of 0.0 ~ 1.0, but up to 5.0 to allow boost and distortion,
+        // which is the original plugin's behavior (some factory patches do, for example, "SoftDistBass").
+        //
+        // Internal value range: 0.0 ~ 10.0 (aka. param * 2.0)
+        parameter.ranges.min = 0.0f;
+        parameter.ranges.max = 5.0f;    // Allow up to 10.0 internal value for distortion
+        parameter.ranges.def = getParameter(index);
+        break;
+    }
+#endif
+
     // Must set parameter.symbol, this is the unique ID of each parameter.
     // If not set, you can neither save presets nor reset to factory default, in VST3 and CLAP!
     char buff[256];

@@ -51,6 +51,9 @@ CCetone033::CCetone033()
         this->Voices[i]->SetFilterParams(1.0f, 0.0f);
     }
     this->MaxPolyphony = 16;
+#ifdef ENABLE_VOLUME_BOOSTING
+    this->PolyphonyGainCompensation = 1.0f / sqrtf((float)this->MaxPolyphony);
+#endif
     this->LastVoiceIndex = -1;
     this->LastNotePitch = 0;
     this->HasLastNote = false;
@@ -252,6 +255,9 @@ void CCetone033::InitParameters()
 
 #ifdef ENABLE_POLYPHONY
     this->MaxPolyphony = 16;
+#ifdef ENABLE_VOLUME_BOOSTING
+    this->PolyphonyGainCompensation = 1.0f / sqrtf((float)this->MaxPolyphony);
+#endif
 #endif
 
     memcpy(this->OldPrograms, PresetData, sizeof(SynthProgramOld) * 128);
@@ -331,6 +337,9 @@ void CCetone033::ReadProgram(int prg)
     this->MaxPolyphony = p->MaxPolyphony;
     if (this->MaxPolyphony < 1) this->MaxPolyphony = 1;
     if (this->MaxPolyphony > 16) this->MaxPolyphony = 16;
+#ifdef ENABLE_VOLUME_BOOSTING
+    this->PolyphonyGainCompensation = 1.0f / sqrtf((float)this->MaxPolyphony);
+#endif
 #endif
 
     this->SetGlideSpeed(this->GlideSpeed);

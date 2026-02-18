@@ -172,6 +172,9 @@ private:
 #ifdef ENABLE_POLYPHONY
     CVoice*           Voices[MAX_POLYPHONY];
     int               MaxPolyphony;
+#ifdef ENABLE_VOLUME_BOOSTING
+    float             PolyphonyGainCompensation;  // Pre-calculated: 1.0 / sqrt(MaxPolyphony)
+#endif
     int               LastVoiceIndex;
     int               LastNotePitch;
     bool              HasLastNote;
