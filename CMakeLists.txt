@@ -39,7 +39,6 @@ dpf_add_plugin (${PROJECT_NAME}
         src/Cetone033DPF.cpp
         src/Cetone033Main.cpp
         src/Cetone033Plugin.cpp
-        src/PresetData.cpp
         ${SRC_BACKEND}
     FILES_UI
         src/CetoneUI.cpp
@@ -49,6 +48,11 @@ dpf_add_plugin (${PROJECT_NAME}
         dpf-widgets/opengl/DearImGui.cpp
         src/Widgets/ImGui_UI.cpp
         src/Widgets/ImGui_UI_MessageBox.cpp
+        src/Widgets/ImGui_UI_FileBrowser.cpp
+        src/PresetManager.cpp
+        src/PresetManagerHelper.cpp
+    FILES_COMMON
+        src/PresetData.cpp
 )
 
 if (CETONE_ENABLE_POLYPHONY)

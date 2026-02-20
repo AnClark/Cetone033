@@ -176,3 +176,22 @@ int CCetoneUI::_c_val2modMul(float value)
 {
     return floorf(value * 100.f + 0.5f);
 }
+
+void CCetoneUI::_updateState(const char* newPresetName, const char* newBankName, bool isModified)
+{
+    // Update local storage
+    this->fCurrentPresetName = newPresetName;
+    this->fCurrentPresetBank = newBankName;
+    this->fPresetIsModified = isModified;
+
+    // Send state to DSP side
+    this->setState(STATE_PRESET_NAME, newPresetName);
+    this->setState(STATE_PRESET_BANK, newBankName);
+    this->setState(STATE_PRESET_MODIFIED, isModified ? "true" : "false");
+}
+
+void CCetoneUI::_updateState(bool isModified)
+{
+    this->fPresetIsModified = isModified;
+    this->setState(STATE_PRESET_MODIFIED, isModified ? "true" : "false");
+}

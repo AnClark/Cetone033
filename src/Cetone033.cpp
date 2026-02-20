@@ -30,7 +30,7 @@ int                  CCetone033::FreqStepInt[PITCH_MAX];
 int                  CCetone033::FreqStepFrac[PITCH_MAX];
 
 CCetone033::CCetone033()
-    : DISTRHO::Plugin(pParameters, 0, 0) // parameters, programs, states
+    : DISTRHO::Plugin(pParameters, 0, STATE_COUNT) // parameters, programs, states
 {
     this->InitFreqTables(44100.f);
 
