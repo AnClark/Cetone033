@@ -44,3 +44,12 @@
 #ifdef ENABLE_POLYPHONY
 #define MAX_POLYPHONY 16
 #endif
+
+#define DEFAULT_USER_BANK_FILENAME "Default.c033bank"
+#define DEFAULT_USER_BANK_NAME "Default Bank"
+#define USER_PRESET_FILE_EXTENSION ".c033"
+#define USER_PRESET_BANK_EXTENSION ".c033bank"
+#define USER_PRESET_BANK_SUBDIR "Banks"
+
+#define FACTORY_BANK_NAME "Factory"
+#define BANK_NAME_FOR_SINGLE_IMPORTED_PRESET "@@@Imported@@@" // Use special charater to avoid conflict with possible bank names

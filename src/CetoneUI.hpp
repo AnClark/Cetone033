@@ -5,6 +5,7 @@
 #include "NanoVG.hpp"
 
 #include "Widgets/ImGui_UI.hpp"
+#include "PresetManager.h"
 
 using DGL_NAMESPACE::ImageAboutWindow;
 using DGL_NAMESPACE::ImageButton;
@@ -30,6 +31,7 @@ protected:
     // DSP Callbacks
 
     void parameterChanged(uint32_t index, float value) override;
+    void stateChanged(const char *key, const char *value) override;
 
     // -------------------------------------------------------------------
     // Widget Callbacks
@@ -113,6 +115,19 @@ private:
 #endif
 
     // -------------------------------------------------------------------
+    // Preset Manager Instance
+
+    // TODO: Save preset name in plugin state for preset switching and recall.
+    
+
+    ScopedPointer<CPresetManager> fPresetManager;
+    friend class CPresetManager;
+    String fCurrentPresetName;
+    String fCurrentPresetBank;  // Bank name: FACTORY_BANK_NAME, DEFAULT_USER_BANK_NAME, BANK_NAME_FOR_SINGLE_IMPORTED_PRESET or any imported bank name
+    bool fPresetIsModified; // TODO: Append asterisk to preset name when current program is modified but not saved, like "Init Patch*".
+                            // This should be stored in plugin state as well, to avoid losing this info when reopening UI.
+
+    // -------------------------------------------------------------------
     // Helpers
 
     void _createKnob(ScopedPointer<ImageKnob>& knob, uint32_t paramId, uint absolutePosX, uint absolutePosY, float defaultValue, uint rotationAngle = 275);
@@ -133,6 +148,9 @@ private:
     int _c_val2pw(float value);
     int _c_val2modAmount(float value);
     int _c_val2modMul(float value);
+
+    void _updateState(const char* newPresetName, const char* newBankName, bool isModified);
+    void _updateState(bool isModified);
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CCetoneUI)
 };

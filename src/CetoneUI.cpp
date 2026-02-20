@@ -75,6 +75,12 @@ CCetoneUI::CCetoneUI()
     _createHiddenButton(fBtnOsc2Waveform, pOsc2Wave, Size<uint>(45, 10 + 2), Point<int>(274 + 48 * 2, 124 - 4));
 
     _createHiddenButton(fBtnFilterType, pFilterType, Size<uint>(45, 10 + 2), Point<int>(382 + 48 * 2, 234 - 4));
+
+    /* Preset Manager */
+    fPresetManager = new CPresetManager(this);
+    fCurrentPresetName = DEFAULT_PRESET_NAME;
+    fCurrentPresetBank = FACTORY_BANK_NAME;
+    fPresetIsModified = false;
 }
 
 void CCetoneUI::parameterChanged(uint32_t index, float value)
@@ -176,6 +182,24 @@ void CCetoneUI::parameterChanged(uint32_t index, float value)
     repaint();
 }
 
+void CCetoneUI::stateChanged(const char *key, const char *value)
+{
+    if (std::strcmp(key, STATE_PRESET_NAME) == 0)
+    {
+        fCurrentPresetName = value;
+    }
+    else if (std::strcmp(key, STATE_PRESET_MODIFIED) == 0)
+    {
+        fPresetIsModified = (std::strcmp(value, "true") == 0) ? true : false;
+    }
+    else if (std::strcmp(key, STATE_PRESET_BANK) == 0)
+    {
+        // Track which bank the current preset comes from
+        // Could be FACTORY_BANK_NAME, DEFAULT_USER_BANK_NAME, BANK_NAME_FOR_SINGLE_IMPORTED_PRESET, or external bank name
+        fCurrentPresetBank = value;
+    }
+}
+
 // -------------------------------------------------------------------
 // Widget Callbacks
 
@@ -214,6 +238,7 @@ void CCetoneUI::imageButtonClicked(ImageButton* button, int)
 void CCetoneUI::imageSwitchClicked(ImageSwitch* button, bool down)
 {
     setParameterValue(button->getId(), down);
+    _updateState(true); // Mark preset as modified when any parameter is changed
 }
 
 void CCetoneUI::imageKnobDragStarted(ImageKnob* knob)
@@ -229,6 +254,7 @@ void CCetoneUI::imageKnobDragFinished(ImageKnob* knob)
 void CCetoneUI::imageKnobValueChanged(ImageKnob* knob, float value)
 {
     setParameterValue(knob->getId(), value);
+    _updateState(true); // Mark preset as modified when any parameter is changed
 
     // Explicitly ask DPF to redraw UI (for updating labels)
     repaint();
@@ -247,6 +273,7 @@ void CCetoneUI::imageSliderDragFinished(ImageSlider* slider)
 void CCetoneUI::imageSliderValueChanged(ImageSlider* slider, float value)
 {
     setParameterValue(slider->getId(), value);
+    _updateState(true); // Mark preset as modified when any parameter is changed
 }
 
 void CCetoneUI::onDisplay()
