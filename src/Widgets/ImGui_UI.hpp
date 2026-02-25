@@ -18,6 +18,10 @@
 
 #include "DearImGui.hpp"
 
+#include <queue>
+#include <string>
+#include <mutex>
+
 // Forward decls.
 class CCetoneUI;
 
@@ -32,7 +36,9 @@ public:
 
     bool isAboutWindowOpen = false;
     uint16_t requestMenuId = 0;
-    
+
+    std::queue<std::string> messageBoxQueue;
+
     ImVec2 menuPos{0, 0};
 
     double userScaling = 1.0f;
@@ -50,4 +56,9 @@ private:
     void _triggerParamUpdate(uint32_t paramId, float newValue);
 
     uint16_t _requestedModParam = 0;
+
+    // Message box stuff
+    bool _requestMessagePopup = false;
+    void _handleMessageBoxIdle();   // Handle the idle state of the message box mechanism
+    std::mutex _messageQueueMutex;
 };

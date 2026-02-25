@@ -48,6 +48,7 @@ dpf_add_plugin (${PROJECT_NAME}
         src/Fonts/CetoneFonts.cpp 
         dpf-widgets/opengl/DearImGui.cpp
         src/Widgets/ImGui_UI.cpp
+        src/Widgets/ImGui_UI_MessageBox.cpp
 )
 
 if (CETONE_ENABLE_POLYPHONY)
