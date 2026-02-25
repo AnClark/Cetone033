@@ -72,6 +72,36 @@ void CCetoneUI::_createHiddenButton(ScopedPointer<ImageButton>& button, uint id,
     button->setCallback(this);
 }
 
+void CCetoneUI::_requestMessageBox(std::string message)
+{
+    DISTRHO_SAFE_ASSERT_RETURN(fImGuiInstance.get(), )
+
+    // Append new message to message box queue.
+    // UI polls message queue on every OnImGuiDisplay() call, then show message box on demand.
+    fImGuiInstance->messageBoxQueue.push(std::string(message));
+}
+
+void CCetoneUI::logAndShowMessage(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    constexpr uint16_t MAX_MESSAGE_LENGTH = 128;
+    char buffer[MAX_MESSAGE_LENGTH] = {'\0'};
+    vsnprintf(buffer, MAX_MESSAGE_LENGTH, fmt, args);
+
+    va_end(args);
+
+    // Print log to console
+    d_stderr("%s", buffer);
+
+    // Show message box on UI side
+    // NOTE: Use std::string because it supports deep copy when passing params to another function.
+    //       If not using std::string (e.g. passing char[] or DISTRHO::String), object may be destroyed too early,
+    //       messing up the message text in _requestMessageBox().
+    _requestMessageBox(std::string(buffer));
+}
+
 const char* CCetoneUI::_wave2Str(int wave)
 {
     switch (wave) {

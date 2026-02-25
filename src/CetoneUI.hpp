@@ -50,6 +50,11 @@ protected:
 
     void idleCallback() override;
 
+    // -------------------------------------------------------------------
+    // UI Tools (only invoked by CCetoneUI and its friend classes)
+
+    void logAndShowMessage(const char* fmt, ...);
+
 private:
     // -------------------------------------------------------------------
     // Label renderer
@@ -115,6 +120,8 @@ private:
     void _createSwitchButton(ScopedPointer<ImageSwitch>& switchButton, uint32_t paramId, uint absolutePosX, uint absolutePosY);
     void _createButton(ScopedPointer<ImageButton>& button, uint id, Image& imageNormal, Image& imagePressed, uint absolutePosX, uint absolutePosY);
     void _createHiddenButton(ScopedPointer<ImageButton>& button, uint id, Size<uint> size, Point<int> absolutePos);
+
+    void _requestMessageBox(std::string message);
 
     const char* _wave2Str(int wave);
     const char* _filterType2Str(int type);  // Equals CCetoneLpFilter::Name()
