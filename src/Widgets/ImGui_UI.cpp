@@ -586,14 +586,14 @@ void ImGuiUI::onImGuiDisplay()
         if (ImGui::BeginCombo("##SaveBankSelect", _pendingSaveBankName.c_str()))
         {
             // Default user bank
-            bool isSelected = (_pendingSaveBankName == DEFAULT_USER_BANK_NAME);
+            const bool isSelected = (_pendingSaveBankName == DEFAULT_USER_BANK_NAME);
             if (ImGui::Selectable(DEFAULT_USER_BANK_NAME, isSelected))
                 _pendingSaveBankName = DEFAULT_USER_BANK_NAME;
             if (isSelected) ImGui::SetItemDefaultFocus();
             // Imported banks
             for (const auto& bk : importedBanks)
             {
-                bool isBkSelected = (_pendingSaveBankName == bk.buffer());
+                const bool isBkSelected = (_pendingSaveBankName == bk.buffer());
                 if (ImGui::Selectable(bk.buffer(), isBkSelected))
                     _pendingSaveBankName = bk.buffer();
                 if (isBkSelected) ImGui::SetItemDefaultFocus();
@@ -637,7 +637,16 @@ void ImGuiUI::onImGuiDisplay()
         ImGui::Dummy(ImVec2(0, 4));
         ImGui::Separator();
 
+        const bool presetNameIsEmpty = (_presetNameEditorBuffer[0] == '\0');
+        if (presetNameIsEmpty)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
+            ImGui::TextWrapped("Preset name cannot be empty.");
+            ImGui::PopStyleColor();
+        }
+
         const char* saveButtonLabel = presetAlreadyExists ? "Overwrite" : "Save";
+        ImGui::BeginDisabled(presetNameIsEmpty);
         if (ImGui::Button(saveButtonLabel, ImVec2(120, 0)))
         {
             // Capture current parameters
@@ -656,6 +665,7 @@ void ImGuiUI::onImGuiDisplay()
             ImGui::CloseCurrentPopup();
             requestSavePresetPopup = false;
         }
+        ImGui::EndDisabled();
         ImGui::SetItemDefaultFocus();
         ImGui::SameLine();
         if (ImGui::Button("Cancel", ImVec2(120, 0)))
@@ -701,13 +711,22 @@ void ImGuiUI::onImGuiDisplay()
             ImGui::Dummy(ImVec2(0, 4));
             ImGui::Separator();
 
+            const bool renamePresetDisabled = (_presetNameEditorBuffer[0] == '\0') ||
+                                              (ui->fCurrentPresetName == String(_presetNameEditorBuffer));
+            if (renamePresetDisabled)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
+                ImGui::TextWrapped(_presetNameEditorBuffer[0] == '\0' ? "Preset name cannot be empty." : "New name is the same as the current name.");
+                ImGui::PopStyleColor();
+            }
+
+            ImGui::BeginDisabled(renamePresetDisabled);
             if (ImGui::Button("Rename", ImVec2(120, 0)))
             {
                 String oldName = ui->fCurrentPresetName;
                 String newName = String(_presetNameEditorBuffer);
                 String bankName = ui->fCurrentPresetBank;
 
-                if (oldName != newName && newName.isNotEmpty())
                 {
                     if (ui->fPresetManager->renamePresetInBank(bankName.buffer(), oldName.buffer(), newName.buffer()))
                     {
@@ -725,6 +744,7 @@ void ImGuiUI::onImGuiDisplay()
                 ImGui::CloseCurrentPopup();
                 requestRenamePresetPopup = false;
             }
+            ImGui::EndDisabled();
             ImGui::SetItemDefaultFocus();
             ImGui::SameLine();
             if (ImGui::Button("Cancel", ImVec2(120, 0)))
@@ -842,24 +862,24 @@ void ImGuiUI::onImGuiDisplay()
         ImGui::Dummy(ImVec2(0, 4));
         ImGui::Separator();
 
+        const bool bankNameIsEmpty = (_bankNameEditorBuffer[0] == '\0');
+        ImGui::BeginDisabled(bankNameIsEmpty);
         if (ImGui::Button("Create", ImVec2(120, 0)))
         {
             String newBankName(_bankNameEditorBuffer);
-            if (newBankName.isNotEmpty())
+            if (ui->fPresetManager->createNewBank(newBankName.buffer()))
             {
-                if (ui->fPresetManager->createNewBank(newBankName.buffer()))
-                {
-                    ui->logAndShowMessage("Bank '%s' created successfully.", newBankName.buffer());
-                    _shouldRefreshBankList = true;
-                }
-                else
-                {
-                    ui->logAndShowMessage("Failed to create bank '%s'. It may already exist.", newBankName.buffer());
-                }
+                ui->logAndShowMessage("Bank '%s' created successfully.", newBankName.buffer());
+                _shouldRefreshBankList = true;
+            }
+            else
+            {
+                ui->logAndShowMessage("Failed to create bank '%s'. It may already exist.", newBankName.buffer());
             }
             ImGui::CloseCurrentPopup();
             requestNewBankPopup = false;
         }
+        ImGui::EndDisabled();
         ImGui::SetItemDefaultFocus();
         ImGui::SameLine();
         if (ImGui::Button("Cancel", ImVec2(120, 0)))
@@ -887,12 +907,21 @@ void ImGuiUI::onImGuiDisplay()
         ImGui::Dummy(ImVec2(0, 4));
         ImGui::Separator();
 
+        const bool renameBankDisabled = (_bankNameEditorBuffer[0] == '\0') ||
+                                        (std::strcmp(_bankNameEditorBuffer, _fileBrowserBankName.c_str()) == 0);
+        if (renameBankDisabled)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
+            ImGui::TextWrapped(_bankNameEditorBuffer[0] == '\0' ? "Bank name cannot be empty." : "New name is the same as the current name.");
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::BeginDisabled(renameBankDisabled);
         if (ImGui::Button("Rename", ImVec2(120, 0)))
         {
             String oldName(_fileBrowserBankName.c_str());
             String newName(_bankNameEditorBuffer);
 
-            if (newName.isNotEmpty() && oldName != newName)
             {
                 if (ui->fPresetManager->renameBankByName(oldName.buffer(), newName.buffer()))
                 {
@@ -911,6 +940,7 @@ void ImGuiUI::onImGuiDisplay()
             ImGui::CloseCurrentPopup();
             requestRenameBankPopup = false;
         }
+        ImGui::EndDisabled();
         ImGui::SetItemDefaultFocus();
         ImGui::SameLine();
         if (ImGui::Button("Cancel", ImVec2(120, 0)))
