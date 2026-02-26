@@ -1044,6 +1044,12 @@ bool CPresetManager::importBankFromFile(const char* filePath) {
     } else {
         bankName = fileName;
     }
+    
+    // Sanitize bank name for use as filename (remove illegal characters)
+    _sanitizeBankName(bankName);
+    
+    // Rebuild filename with sanitized bank name
+    fileName = bankName + USER_PRESET_BANK_EXTENSION;
 
     // Check if trying to import with reserved name
     if (_isDefaultUserBank(bankName.buffer()) || _isFactoryBank(bankName.buffer())) {
@@ -1128,6 +1134,17 @@ bool CPresetManager::importBankFromFile(const char* filePath) {
         std::free(nameBuf);
     } else {
         finalBankName = finalFileName;
+    }
+    
+    // Note: finalBankName should already be sanitized since targetPath was built from sanitized fileName
+    // But we verify it doesn't contain illegal characters (defensive programming)
+    // In case the conflict resolution added unsanitized suffix (though current code only adds "_N")
+    String verifiedBankName = finalBankName;
+    _sanitizeBankName(verifiedBankName);
+    if (verifiedBankName != finalBankName) {
+        d_stderr("importBankFromFile: Unexpected: final filename contained illegal chars, fixed: '%s' -> '%s'",
+                 finalBankName.buffer(), verifiedBankName.buffer());
+        finalBankName = verifiedBankName;
     }
     
     // Force sync: JSON bankName must match filename
@@ -1259,6 +1276,10 @@ bool CPresetManager::renameBankByName(const char* oldName,
         return false;
     }
 
+    // Sanitize new bank name for use as filename (remove illegal characters)
+    String sanitizedNewName = String(newName);
+    _sanitizeBankName(sanitizedNewName);
+
     // Cannot rename special banks
     if (_isDefaultUserBank(oldName) || _isFactoryBank(oldName)) {
         d_stderr("renameBankByName: Cannot rename Factory or User bank");
@@ -1266,16 +1287,16 @@ bool CPresetManager::renameBankByName(const char* oldName,
     }
 
     // Cannot rename to reserved names
-    if (_isDefaultUserBank(newName) || _isFactoryBank(newName)) {
-        d_stderr("renameBankByName: Cannot rename to reserved name '%s'", newName);
+    if (_isDefaultUserBank(sanitizedNewName.buffer()) || _isFactoryBank(sanitizedNewName.buffer())) {
+        d_stderr("renameBankByName: Cannot rename to reserved name '%s'", sanitizedNewName.buffer());
         return false;
     }
 
     // Check if new name already exists
-    String newFilePath = _getBankFilePath(newName);
+    String newFilePath = _getBankFilePath(sanitizedNewName.buffer());
     if (_fileExists(newFilePath)) {
         d_stderr("renameBankByName: A bank with name '%s' already exists",
-                 newName);
+                 sanitizedNewName.buffer());
         return false;
     }
 
@@ -1302,11 +1323,11 @@ bool CPresetManager::renameBankByName(const char* oldName,
     // Update bank internal metadata
     PresetBank bank;
     if (_loadBankFromFile(newFilePath, bank)) {
-        bank.Name = String(newName);
+        bank.Name = sanitizedNewName;
         _saveBankToFile(newFilePath, bank);
     }
 
-    d_stderr("Successfully renamed bank from '%s' to '%s'", oldName, newName);
+    d_stderr("Successfully renamed bank from '%s' to '%s'", oldName, sanitizedNewName.buffer());
     return true;
 }
 
@@ -1410,22 +1431,26 @@ bool CPresetManager::createNewBank(const char* bankName)
         return false;
     }
 
+    // Sanitize bank name for use as filename (remove illegal characters)
+    String sanitizedBankName = String(bankName);
+    _sanitizeBankName(sanitizedBankName);
+    
     // Check for reserved names
-    if (_isDefaultUserBank(bankName) || _isFactoryBank(bankName)) {
-        d_stderr("createNewBank: Cannot use reserved name '%s'", bankName);
+    if (_isDefaultUserBank(sanitizedBankName.buffer()) || _isFactoryBank(sanitizedBankName.buffer())) {
+        d_stderr("createNewBank: Cannot use reserved name '%s'", sanitizedBankName.buffer());
         return false;
     }
 
     // Check if bank already exists
-    String filePath = _getBankFilePath(bankName);
+    String filePath = _getBankFilePath(sanitizedBankName.buffer());
     if (_fileExists(filePath)) {
-        d_stderr("createNewBank: Bank '%s' already exists", bankName);
+        d_stderr("createNewBank: Bank '%s' already exists", sanitizedBankName.buffer());
         return false;
     }
 
     // Create empty bank
     PresetBank newBank;
-    newBank.Name = String(bankName);
+    newBank.Name = sanitizedBankName;
     newBank.Presets.clear();
 
     // Save to file
@@ -1434,7 +1459,7 @@ bool CPresetManager::createNewBank(const char* bankName)
         return false;
     }
 
-    d_stderr("Successfully created new bank '%s'", bankName);
+    d_stderr("Successfully created new bank '%s'", sanitizedBankName.buffer());
     return true;
 }
 
