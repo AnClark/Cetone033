@@ -344,6 +344,8 @@ void ImGuiUI::onImGuiDisplay()
                         opts.saving = true;
                         opts.title = "Export Default Bank";
                         opts.defaultName = DEFAULT_USER_BANK_FILENAME;
+                        if (_fileBrowserHandle != nullptr)
+                            DGL_NAMESPACE::fileBrowserClose(_fileBrowserHandle);
                         _fileBrowserHandle = DGL_NAMESPACE::fileBrowserCreate(false, getWindow().getNativeWindowHandle(),
                                                                getScaleFactor(), opts);
                         _fileBrowserAction = kFileBrowserExportBank;
@@ -430,6 +432,8 @@ void ImGuiUI::onImGuiDisplay()
                             opts.saving = true;
                             opts.title = "Export Bank";
                             opts.defaultName = defaultFilename;
+                            if (_fileBrowserHandle != nullptr)
+                                DGL_NAMESPACE::fileBrowserClose(_fileBrowserHandle);
                             _fileBrowserHandle = DGL_NAMESPACE::fileBrowserCreate(false, getWindow().getNativeWindowHandle(),
                                                                    getScaleFactor(), opts);
                             _fileBrowserAction = kFileBrowserExportBank;
@@ -466,7 +470,8 @@ void ImGuiUI::onImGuiDisplay()
                     DGL_NAMESPACE::FileBrowserOptions opts;
                     opts.saving = false;
                     opts.title = "Import Preset Bank";
-                    
+                    if (_fileBrowserHandle != nullptr)
+                        DGL_NAMESPACE::fileBrowserClose(_fileBrowserHandle);
                     _fileBrowserHandle = DGL_NAMESPACE::fileBrowserCreate(false, getWindow().getNativeWindowHandle(), 
                                                            getScaleFactor(), opts);
                     _fileBrowserAction = kFileBrowserImportBank;
@@ -539,11 +544,13 @@ void ImGuiUI::onImGuiDisplay()
                 // Import/Export
                 if (ImGui::MenuItem("Export Preset to File..."))
                 {
+                    String defaultPresetFilename = ui->fCurrentPresetName + String(USER_PRESET_FILE_EXTENSION);
                     DGL_NAMESPACE::FileBrowserOptions opts;
                     opts.saving = true;
                     opts.title = "Export Preset";
-                    opts.defaultName = (ui->fCurrentPresetName + String(USER_PRESET_FILE_EXTENSION)).buffer();
-                    
+                    opts.defaultName = defaultPresetFilename.buffer(); // Must outlive fileBrowserCreate call
+                    if (_fileBrowserHandle != nullptr)
+                        DGL_NAMESPACE::fileBrowserClose(_fileBrowserHandle);
                     _fileBrowserHandle = DGL_NAMESPACE::fileBrowserCreate(false, getWindow().getNativeWindowHandle(), 
                                                            getScaleFactor(), opts);
                     _fileBrowserAction = kFileBrowserExportPreset;
@@ -554,7 +561,8 @@ void ImGuiUI::onImGuiDisplay()
                     DGL_NAMESPACE::FileBrowserOptions opts;
                     opts.saving = false;
                     opts.title = "Import Preset";
-                    
+                    if (_fileBrowserHandle != nullptr)
+                        DGL_NAMESPACE::fileBrowserClose(_fileBrowserHandle);
                     _fileBrowserHandle = DGL_NAMESPACE::fileBrowserCreate(false, getWindow().getNativeWindowHandle(), 
                                                            getScaleFactor(), opts);
                     _fileBrowserAction = kFileBrowserImportPreset;
