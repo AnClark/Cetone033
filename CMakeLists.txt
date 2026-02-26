@@ -9,7 +9,7 @@ project (cetone033
 set (CMAKE_CXX_STANDARD 17)
 
 # Option to enable polyphony mode
-option (CETONE_ENABLE_POLYPHONY "Enable polyphonic mode (16 voices)" OFF)
+option (CETONE_ENABLE_POLYPHONY "Enable polyphonic mode (16 voices)" ON)
 option (CETONE_ALLOW_VOLUME_BOOSTING "Allow volume boosting when polyphony is enabled.\nThis enables output normalization as well, in order to prevent overflow." ON)
 
 add_subdirectory (dpf)
