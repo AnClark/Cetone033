@@ -123,4 +123,7 @@ private:
     bool   _saveBankToFile(const String& filePath, const PresetBank& bank);
     bool   _isDefaultUserBank(const char* bankName) const;
     bool   _isFactoryBank(const char* bankName) const;
+
+    // Utilities
+    void _sanitizeBankName(String& bankName) const; // Ensure bank name is valid for filenames
 };

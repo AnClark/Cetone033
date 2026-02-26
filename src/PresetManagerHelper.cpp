@@ -208,3 +208,59 @@ CPresetManager::_saveBankToFile(const String& filePath, const PresetBank& bank)
 
 	return _writeFileContent(filePath, jsonContent);
 }
+
+void
+CPresetManager::_sanitizeBankName(String& bankName) const
+{
+	// 1. Replace illegal filesystem characters with underscore
+	bankName.replace('/', '_');
+	bankName.replace('\\', '_');
+	bankName.replace(':', '_');
+	bankName.replace('*', '_');
+	bankName.replace('?', '_');
+	bankName.replace('\"', '_');
+	bankName.replace('<', '_');
+	bankName.replace('>', '_');
+	bankName.replace('|', '_');
+	
+	// 2. Trim leading spaces
+	while (bankName.length() > 0 && bankName[0] == ' ') {
+		// Create a temporary copy to avoid dangling pointer
+		String temp(bankName.buffer() + 1);
+		bankName = temp;
+	}
+	
+	// 3. Trim trailing spaces and dots (Windows restriction)
+	while (bankName.length() > 0) {
+		const char lastChar = bankName[bankName.length() - 1];
+		if (lastChar == ' ' || lastChar == '.') {
+			bankName.truncate(bankName.length() - 1);
+		} else {
+			break;
+		}
+	}
+	
+	// 4. Check for Windows reserved names (case-insensitive)
+	// Reserved: CON, PRN, AUX, NUL, COM1-9, LPT1-9
+	if (bankName.length() > 0) {
+		String upperName = bankName.asUpper();
+		const char* reserved[] = {
+			"CON", "PRN", "AUX", "NUL",
+			"COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+			"LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+		};
+		
+		for (int i = 0; i < 22; i++) {
+			if (upperName == reserved[i]) {
+				// Prefix with underscore to avoid reserved name
+				bankName = String("_") + bankName;
+				break;
+			}
+		}
+	}
+	
+	// 5. Ensure the result is not empty (fallback to "Unnamed" if all chars were illegal)
+	if (bankName.length() == 0) {
+		bankName = String("Unnamed");
+	}
+}
