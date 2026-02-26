@@ -25,6 +25,23 @@ void CCetone033::initParameter(uint32_t index, Parameter& parameter)
 	parameter.ranges.def = getParameter(index);
 #endif
 
+#if defined(ENABLE_POLYPHONY) && defined(ENABLE_VOLUME_BOOSTING)
+    switch (index) {
+    case pOsc1Volume:
+    case pOsc2Volume:
+    case pVolume:
+        // For volume parameters, param values are factors for calculating amplifier parameters.
+        // They are not limited to range of 0.0 ~ 1.0, but up to 5.0 to allow boost and distortion,
+        // which is the original plugin's behavior (some factory patches do, for example, "SoftDistBass").
+        //
+        // Internal value range: 0.0 ~ 10.0 (aka. param * 2.0)
+        parameter.ranges.min = 0.0f;
+        parameter.ranges.max = 5.0f;    // Allow up to 10.0 internal value for distortion
+        parameter.ranges.def = getParameter(index);
+        break;
+    }
+#endif
+
     // Must set parameter.symbol, this is the unique ID of each parameter.
     // If not set, you can neither save presets nor reset to factory default, in VST3 and CLAP!
     char buff[256];
@@ -40,6 +57,30 @@ void CCetone033::initParameter(uint32_t index, Parameter& parameter)
     }
 }
 
+void CCetone033::initState(uint32_t index, State& state)
+{
+    switch (index)
+    {
+    case 0:
+        state.key = STATE_PRESET_NAME;
+        state.defaultValue = DEFAULT_PRESET_NAME;
+        this->PresetName = DEFAULT_PRESET_NAME; // Remember to set the default preset state in local storage as well
+        break;
+    case 1:
+        state.key = STATE_PRESET_MODIFIED;
+        state.defaultValue = "false";
+        this->PresetModified = false; // Remember to init local storage as well
+        break;
+    case 2:
+        state.key = STATE_PRESET_BANK;
+        state.defaultValue = FACTORY_BANK_NAME;
+        this->PresetBank = FACTORY_BANK_NAME; // Default to factory bank
+        break;
+    }
+
+    state.hints = kStateIsHostWritable;
+}
+
 float CCetone033::getParameterValue(uint32_t index) const
 {
     return this->getParameter(index);
@@ -48,6 +89,33 @@ float CCetone033::getParameterValue(uint32_t index) const
 void CCetone033::setParameterValue(uint32_t index, float value)
 {
     this->setParameter(index, value);
+}
+
+String CCetone033::getState(const char* key) const
+{
+    static const String sTrue ("true");
+    static const String sFalse("false");
+
+    if (std::strcmp(key, STATE_PRESET_NAME) == 0)
+        return PresetName;
+    else if (std::strcmp(key, STATE_PRESET_MODIFIED) == 0)
+        return PresetModified ? sTrue : sFalse;
+    else if (std::strcmp(key, STATE_PRESET_BANK) == 0)
+        return PresetBank;
+
+    return String();
+}
+
+void CCetone033::setState(const char* key, const char* value)
+{
+    const bool valueOnOff = (std::strcmp(value, "true") == 0);
+
+    if (std::strcmp(key, STATE_PRESET_NAME) == 0)
+        PresetName = value;
+    else if (std::strcmp(key, STATE_PRESET_MODIFIED) == 0)
+        PresetModified = valueOnOff;
+    else if (std::strcmp(key, STATE_PRESET_BANK) == 0)
+        PresetBank = value;
 }
 
 void CCetone033::activate()

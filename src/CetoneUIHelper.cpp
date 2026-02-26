@@ -3,6 +3,9 @@
 
 constexpr float PARAM_MIN_VALUE = 0.0f;
 constexpr float PARAM_MAX_VALUE = 1.0f;
+#if defined(ENABLE_POLYPHONY) && defined(ENABLE_VOLUME_BOOSTING)
+constexpr float PARAM_MAX_VALUE_VOLUME = 5.0f;
+#endif
 constexpr float PARAM_DEFAULT_VALUE = 0.5f;
 
 void CCetoneUI::_createKnob(ScopedPointer<ImageKnob>& knob, uint32_t paramId, uint absolutePosX, uint absolutePosY, float defaultValue, uint rotationAngle)
@@ -17,6 +20,16 @@ void CCetoneUI::_createKnob(ScopedPointer<ImageKnob>& knob, uint32_t paramId, ui
     knob->setValue(defaultValue);
     knob->setRotationAngle(rotationAngle);
     knob->setCallback(this);
+
+#if defined(ENABLE_POLYPHONY) && defined(ENABLE_VOLUME_BOOSTING)
+    switch (paramId) {
+    case pOsc1Volume:
+    case pOsc2Volume:
+    case pVolume:
+        knob->setRange(PARAM_MIN_VALUE, PARAM_MAX_VALUE_VOLUME);
+        break;
+    }
+#endif
 }
 
 void CCetoneUI::_createSlider(ScopedPointer<ImageSlider>& slider, uint32_t paramId, uint startPosX, uint startPosY, uint endPosX, uint endPosY, float step, bool inverted)
@@ -57,6 +70,36 @@ void CCetoneUI::_createHiddenButton(ScopedPointer<ImageButton>& button, uint id,
     button->setAbsolutePos(absolutePos);
     button->setSize(size);
     button->setCallback(this);
+}
+
+void CCetoneUI::_requestMessageBox(std::string message)
+{
+    DISTRHO_SAFE_ASSERT_RETURN(fImGuiInstance.get(), )
+
+    // Append new message to message box queue.
+    // UI polls message queue on every OnImGuiDisplay() call, then show message box on demand.
+    fImGuiInstance->messageBoxQueue.push(std::string(message));
+}
+
+void CCetoneUI::logAndShowMessage(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    constexpr uint16_t MAX_MESSAGE_LENGTH = 128;
+    char buffer[MAX_MESSAGE_LENGTH] = {'\0'};
+    vsnprintf(buffer, MAX_MESSAGE_LENGTH, fmt, args);
+
+    va_end(args);
+
+    // Print log to console
+    d_stderr("%s", buffer);
+
+    // Show message box on UI side
+    // NOTE: Use std::string because it supports deep copy when passing params to another function.
+    //       If not using std::string (e.g. passing char[] or DISTRHO::String), object may be destroyed too early,
+    //       messing up the message text in _requestMessageBox().
+    _requestMessageBox(std::string(buffer));
 }
 
 const char* CCetoneUI::_wave2Str(int wave)
@@ -132,4 +175,23 @@ int CCetoneUI::_c_val2modAmount(float value)
 int CCetoneUI::_c_val2modMul(float value)
 {
     return floorf(value * 100.f + 0.5f);
+}
+
+void CCetoneUI::_updateState(const char* newPresetName, const char* newBankName, bool isModified)
+{
+    // Update local storage
+    this->fCurrentPresetName = newPresetName;
+    this->fCurrentPresetBank = newBankName;
+    this->fPresetIsModified = isModified;
+
+    // Send state to DSP side
+    this->setState(STATE_PRESET_NAME, newPresetName);
+    this->setState(STATE_PRESET_BANK, newBankName);
+    this->setState(STATE_PRESET_MODIFIED, isModified ? "true" : "false");
+}
+
+void CCetoneUI::_updateState(bool isModified)
+{
+    this->fPresetIsModified = isModified;
+    this->setState(STATE_PRESET_MODIFIED, isModified ? "true" : "false");
 }

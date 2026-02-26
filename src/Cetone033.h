@@ -85,12 +85,15 @@ public:
     // Init
 
     void initParameter(uint32_t index, Parameter& parameter) override;
+    void initState(uint32_t index, State& state) override;
 
     // ---------------------------------------
     // Internal data
 
     float getParameterValue(uint32_t index) const override;
     void  setParameterValue(uint32_t index, float value) override;
+    String getState(const char* key) const override;
+    void setState(const char* key, const char* value) override;
 
     // ---------------------------------------
     // Audio/MIDI Processing
@@ -172,6 +175,9 @@ private:
 #ifdef ENABLE_POLYPHONY
     CVoice*           Voices[MAX_POLYPHONY];
     int               MaxPolyphony;
+#ifdef ENABLE_VOLUME_BOOSTING
+    float             PolyphonyGainCompensation;  // Pre-calculated: 1.0 / sqrt(MaxPolyphony)
+#endif
     int               LastVoiceIndex;
     int               LastNotePitch;
     bool              HasLastNote;
@@ -244,6 +250,10 @@ private:
     int   GlideFrac;
     float ModChangeSamples;
     float ModResValue;
+
+    String PresetName;
+    bool   PresetModified;
+    String PresetBank;      // Which bank the current preset comes from (FACTORY_BANK_NAME, DEFAULT_USER_BANK_NAME, BANK_NAME_FOR_SINGLE_IMPORTED_PRESET, or external bank name)
 
     void  ReadProgram(int prg);
     void  WriteProgram(int prg);
