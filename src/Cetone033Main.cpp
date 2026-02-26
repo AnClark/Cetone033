@@ -83,6 +83,9 @@ void CCetone033::SynthProcess(float** inputs, float** outputs, VstInt32 sampleFr
 
 #ifdef ENABLE_POLYPHONY
         // Polyphonic mode: process all active voices
+#ifdef ENABLE_VOLUME_BOOSTING
+        int activeVoices = 0;
+#endif
         for (int v = 0; v < this->MaxPolyphony; v++) {
             if (this->Voices[v]->IsActive()) {
                 output += this->Voices[v]->Process(
@@ -93,8 +96,21 @@ void CCetone033::SynthProcess(float** inputs, float** outputs, VstInt32 sampleFr
                     this->ModEnv, this->ModVel, this->SampleRateEnv, this->SampleRateVel,
                     this->Cutoff, this->Resonance, this->ModResValue,
                     this->FilterCounter, this->ClipState);
+#ifdef ENABLE_VOLUME_BOOSTING
+                activeVoices++;
+#endif
             }
         }
+
+#ifdef ENABLE_VOLUME_BOOSTING
+        // Polyphonic volume compensation: compensate for voice stacking
+        // Use sqrt(MaxPolyphony) to maintain perceived loudness while preventing clipping
+        // This keeps single-note volume similar to monophonic mode while allowing headroom for chords
+        if (activeVoices > 0) {
+            output *= this->PolyphonyGainCompensation;
+        }
+#endif
+
 #else
         // Monophonic mode: original code
 
@@ -229,6 +245,16 @@ void CCetone033::SynthProcess(float** inputs, float** outputs, VstInt32 sampleFr
         Run ends
 
         ****************************************************************************/
+
+#if defined(ENABLE_POLYPHONY) && defined(ENABLE_VOLUME_BOOSTING)
+        // Final output limiter: prevent clipping from extreme gain/polyphony scenarios
+        // Soft-clip above ±1.0 to avoid hard clipping while preserving distortion character
+        if (output > 1.0f) {
+            output = 1.0f + tanhf((output - 1.0f) * 0.5f) * 0.5f;
+        } else if (output < -1.0f) {
+            output = -1.0f + tanhf((output + 1.0f) * 0.5f) * 0.5f;
+        }
+#endif
 
         if (replace) {
             (*out_L++) = output;
