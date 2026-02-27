@@ -117,11 +117,12 @@ void ImGuiUI::_buildPresetManagementMenu()
                 const bool isCurrentInDefaultBank = (ui->fCurrentPresetBank == DEFAULT_USER_BANK_NAME);
                 if (ImGui::MenuItem("Overwrite Current", nullptr, false, isCurrentInDefaultBank))
                 {
-                    // Save current preset with same name (overwrite) to Default Bank
-                    SynthProgram snapshot = ui->fPresetManager->captureCurrentParameters();
-                    ui->fPresetManager->savePresetToDefaultBank(ui->fCurrentPresetName.buffer(), snapshot);
-                    ui->_updateState(ui->fCurrentPresetName.buffer(), DEFAULT_USER_BANK_NAME, false);
-                    ui->logAndShowMessage("Preset '%s' overwritten in Default Bank.", ui->fCurrentPresetName.buffer());
+                    // Ask user for confirmation before overwriting
+                    strncpy(_pendingSavePresetName, ui->fCurrentPresetName.buffer(), MAX_PRESET_NAME_LENGTH);
+                    _pendingSavePresetName[MAX_PRESET_NAME_LENGTH - 1] = '\0';
+                    _pendingSaveBankName = DEFAULT_USER_BANK_NAME;
+                    requestConfirmOverwritePresetPopup = true;
+                    requestConfirmOverwritePresetType = RequestConfirmOverwriteType::kOverwriteCurrentPreset;
                 }
                 
                 ImGui::Separator();
@@ -201,11 +202,12 @@ void ImGuiUI::_buildPresetManagementMenu()
                     const bool isCurrentInThisBank = (ui->fCurrentPresetBank == bankName);
                     if (ImGui::MenuItem("Overwrite Current", nullptr, false, isCurrentInThisBank))
                     {
-                        SynthProgram snap = ui->fPresetManager->captureCurrentParameters();
-                        ui->fPresetManager->savePresetToBank(bankName.buffer(), ui->fCurrentPresetName.buffer(), snap);
-                        ui->_updateState(ui->fCurrentPresetName.buffer(), bankName.buffer(), false);
-                        ui->logAndShowMessage("Preset '%s' overwritten in bank '%s'.",
-                                                ui->fCurrentPresetName.buffer(), bankName.buffer());
+                        // Ask user for confirmation before overwriting
+                        strncpy(_pendingSavePresetName, ui->fCurrentPresetName.buffer(), MAX_PRESET_NAME_LENGTH);
+                        _pendingSavePresetName[MAX_PRESET_NAME_LENGTH - 1] = '\0';
+                        _pendingSaveBankName = bankName.buffer();
+                        requestConfirmOverwritePresetPopup = true;
+                        requestConfirmOverwritePresetType = RequestConfirmOverwriteType::kOverwriteCurrentPreset;
                     }
 
                     ImGui::Separator();
@@ -293,6 +295,7 @@ void ImGuiUI::_buildPresetManagementMenu()
                     _pendingSavePresetName[MAX_PRESET_NAME_LENGTH - 1] = '\0';
                     _pendingSaveBankName = DEFAULT_USER_BANK_NAME;
                     requestConfirmOverwritePresetPopup = true;
+                    requestConfirmOverwritePresetType = RequestConfirmOverwriteType::kOverwriteInDefaultBank;
                 } else {
                     SynthProgram snapshot = ui->fPresetManager->captureCurrentParameters();
                     const char* presetName = ui->fCurrentPresetName.buffer();
@@ -607,7 +610,10 @@ void ImGuiUI::_buildPresetManagementPopups()
     {
         ImGui::Dummy(ImVec2(0, 4));
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.75f, 0.0f, 1.0f));
-        ImGui::TextWrapped("Preset '%s' already exists in bank '%s'.", _pendingSavePresetName, _pendingSaveBankName.c_str());
+        const char* dialogText = (requestConfirmOverwritePresetType == RequestConfirmOverwriteType::kOverwriteInDefaultBank) ?
+                                "Preset '%s' already exists in '%s'." :
+                                "About to overwrite the currently loaded preset '%s' in bank '%s'.";
+        ImGui::TextWrapped(dialogText, _pendingSavePresetName, _pendingSaveBankName.c_str());
         ImGui::TextWrapped("Do you want to overwrite it?");
         ImGui::PopStyleColor();
         ImGui::Dummy(ImVec2(0, 4));
@@ -628,12 +634,14 @@ void ImGuiUI::_buildPresetManagementPopups()
             }
 
             ImGui::CloseCurrentPopup();
+            requestConfirmOverwritePresetPopup = false;
         }
         ImGui::SetItemDefaultFocus();
         ImGui::SameLine();
         if (ImGui::Button("Cancel", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
+            requestConfirmOverwritePresetPopup = false;
         }
 
         ImGui::EndPopup();
