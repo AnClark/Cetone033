@@ -82,7 +82,12 @@ protected:
     bool requestDeleteBankPopup = false;
 
     // Overwrite confirmation popup flag
+    enum class RequestConfirmOverwriteType {
+        kOverwriteInDefaultBank = 2 << 2,   // Overwrite a preset in the Default Bank (quick save)
+        kOverwriteCurrentPreset,
+    };
     bool requestConfirmOverwritePresetPopup = false;
+    RequestConfirmOverwriteType requestConfirmOverwritePresetType;
 
     // ----------------------------------------------------------------
     // File browser stuff (works together with Preset Manager)
