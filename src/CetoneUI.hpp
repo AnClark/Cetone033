@@ -151,6 +151,7 @@ private:
 
     void _updateState(const char* newPresetName, const char* newBankName, bool isModified);
     void _updateState(bool isModified);
+    void _triggerDummyParameterChange();
 
     // Returns true when fCurrentPresetName exists within fCurrentPresetBank on disk.
     // Used by stateChanged() to detect and correct stale state pushed back by host undo.
