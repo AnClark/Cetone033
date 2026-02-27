@@ -86,7 +86,7 @@ void CCetoneUI::logAndShowMessage(const char* fmt, ...)
     va_list args;
     va_start(args, fmt);
 
-    constexpr uint16_t MAX_MESSAGE_LENGTH = 128;
+    constexpr uint16_t MAX_MESSAGE_LENGTH = 512;
     char buffer[MAX_MESSAGE_LENGTH] = {'\0'};
     vsnprintf(buffer, MAX_MESSAGE_LENGTH, fmt, args);
 
