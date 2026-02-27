@@ -152,6 +152,22 @@ private:
     void _updateState(const char* newPresetName, const char* newBankName, bool isModified);
     void _updateState(bool isModified);
 
+    // Returns true when fCurrentPresetName exists within fCurrentPresetBank on disk.
+    // Used by stateChanged() to detect and correct stale state pushed back by host undo.
+    bool fPresetNameStateChecked, fBankNameStateChecked;    // Mark whether we've received preset name and bank name at least once from host,
+                                                            // so we know when to start validating the state.
+    String fPendingPresetName, fPendingBankName;    // Temporarily store the preset name and bank name received from host for validation,
+                                                    // before copying them to fCurrentPresetName and fCurrentPresetBank.
+    bool _validatePresetAndBankState(const String& presetName, const String& bankName); // Check if the given preset name and bank name are valid
+                                                                                        // (exist on disk). Returns true if valid, false if not.
+
+    // Resets UI preset metadata to the factory default state.  Called when
+    // stateChanged() detects that the host pushed back a bank or preset that no
+    // longer exists on disk (e.g. after the user deleted it this session).
+    // Does NOT modify parameter values – those are correctly restored by the host.
+    void _fallbackToDefaultStateOfPreset();
+    void _fallbackToDefaultStateOfBank();
+
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CCetoneUI)
 };
 
