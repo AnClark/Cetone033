@@ -86,7 +86,7 @@ void CCetoneUI::logAndShowMessage(const char* fmt, ...)
     va_list args;
     va_start(args, fmt);
 
-    constexpr uint16_t MAX_MESSAGE_LENGTH = 128;
+    constexpr uint16_t MAX_MESSAGE_LENGTH = 512;
     char buffer[MAX_MESSAGE_LENGTH] = {'\0'};
     vsnprintf(buffer, MAX_MESSAGE_LENGTH, fmt, args);
 
@@ -194,4 +194,84 @@ void CCetoneUI::_updateState(bool isModified)
 {
     this->fPresetIsModified = isModified;
     this->setState(STATE_PRESET_MODIFIED, isModified ? "true" : "false");
+}
+
+bool CCetoneUI::_validatePresetAndBankState(const String& presetName, const String& bankName)
+{
+    if (presetName == DEFAULT_PRESET_NAME && bankName == FACTORY_BANK_NAME) {
+        // Default preset always exists in factory bank
+        return true;
+    }
+
+    std::vector<String> defaultBankPresets;
+    std::vector<String> importedBanks;
+    std::map<std::string, std::vector<String>> importedBankPresets;
+
+    // Fetch the newest list of presets (default bank)
+    for (size_t i = 0; i < fPresetManager->getDefaultBankPresetCount(); i++)
+        defaultBankPresets.push_back(fPresetManager->getDefaultBankPresetName(i));
+
+    // Fetch the newest list of banks and presets (imported banks)
+    importedBanks = fPresetManager->getImportedBankNames();
+    importedBankPresets.clear();
+    for (const auto& bank : importedBanks)
+        importedBankPresets[bank.buffer()] = fPresetManager->getPresetsInBank(bank.buffer());
+
+    if (bankName == FACTORY_BANK_NAME) {
+        // Factory preset: check if it still exists in factory bank
+        for (uint32_t i = 0; i < 128; i++) {
+            if (presetName == String(fPresetManager->getFactoryProgramName(i))) {
+                return true;
+            }
+        }
+        return false;
+    } else if ((bankName == BANK_NAME_FOR_SINGLE_IMPORTED_PRESET)) {
+        // Single imported preset: lives in memory only (not backed by any bank file).
+        // We cannot verify it on disk, so trust whatever the host says.
+        return true;
+    } else if (bankName == DEFAULT_USER_BANK_NAME) {
+        // Default user preset: check if it still exists in default bank
+        for (const auto& preset : defaultBankPresets) {
+            if (presetName == preset) {
+                return true;
+            }
+        }
+        return false;
+    } else {
+        // Imported bank preset: check if bank and preset still exist
+        auto it = importedBankPresets.find(bankName.buffer());
+        if (it != importedBankPresets.end()) {
+            const std::vector<String>& presets = it->second;
+            for (const auto& preset : presets) {
+                if (presetName == preset) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}
+
+void CCetoneUI::_fallbackToDefaultStateOfPreset()
+{
+    // Correct UI metadata to default state when the host reverts to a snapshot
+    // that references a bank or preset that no longer exists on disk.
+    // Does NOT touch parameter values; those were already restored correctly
+    // by the host's undo mechanism.
+    fCurrentPresetName = DEFAULT_PRESET_NAME;
+    fPresetIsModified  = true; // Parameters no longer match any saved preset
+    setState(STATE_PRESET_NAME,     DEFAULT_PRESET_NAME);
+    setState(STATE_PRESET_MODIFIED, "true");
+}
+
+void CCetoneUI::_fallbackToDefaultStateOfBank()
+{
+    // Correct UI metadata to default state when the host reverts to a snapshot
+    // that references a bank or preset that no longer exists on disk.
+    // Does NOT touch parameter values; those were already restored correctly
+    // by the host's undo mechanism.
+    fCurrentPresetBank = FACTORY_BANK_NAME;
+    fPresetIsModified  = true; // Parameters no longer match any saved preset
+    setState(STATE_PRESET_BANK,     FACTORY_BANK_NAME);
+    setState(STATE_PRESET_MODIFIED, "true");
 }

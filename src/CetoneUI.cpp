@@ -81,6 +81,8 @@ CCetoneUI::CCetoneUI()
     fCurrentPresetName = DEFAULT_PRESET_NAME;
     fCurrentPresetBank = FACTORY_BANK_NAME;
     fPresetIsModified = false;
+    fPresetNameStateChecked = false;    
+    fBankNameStateChecked = false;
 }
 
 void CCetoneUI::parameterChanged(uint32_t index, float value)
@@ -186,7 +188,8 @@ void CCetoneUI::stateChanged(const char *key, const char *value)
 {
     if (std::strcmp(key, STATE_PRESET_NAME) == 0)
     {
-        fCurrentPresetName = value;
+        fPendingPresetName = value;
+        fPresetNameStateChecked = true; // Mark that we've received preset name at least once, so we can start validating state when bank name is received.
     }
     else if (std::strcmp(key, STATE_PRESET_MODIFIED) == 0)
     {
@@ -196,7 +199,28 @@ void CCetoneUI::stateChanged(const char *key, const char *value)
     {
         // Track which bank the current preset comes from
         // Could be FACTORY_BANK_NAME, DEFAULT_USER_BANK_NAME, BANK_NAME_FOR_SINGLE_IMPORTED_PRESET, or external bank name
-        fCurrentPresetBank = value;
+        fPendingBankName = value;
+        fBankNameStateChecked = true; // Mark that we've received bank name at least once, so we can start validating state when preset name is received.
+    }
+
+    // Validate the state every time when host sends new preset name or bank name, to catch the case when host modifies states,
+    // ESPECIALLY undo/redo, to a snapshot that references a preset or bank that no longer exists on disk.
+    //
+    // NOTE: Host may invoke stateChanged() multiple times during UI initialization, and preset name and bank name may arrive in any order,
+    //       so we need to track them separately and only start validating when we've received both.
+    if (fPresetNameStateChecked && fBankNameStateChecked) {
+        if (_validatePresetAndBankState(fPendingPresetName, fPendingBankName)) {
+            fCurrentPresetName = fPendingPresetName;
+            fCurrentPresetBank = fPendingBankName;            
+        } else {
+            logAndShowMessage("Current preset '%s' in bank '%s' is no longer valid.\n(May have been removed from disk.)\nPreset name has been reset to default.\n\nNote: Previous param settings may be preserved.\nClick 'Presets' -> 'Save As' if you want to preserve them.", fPendingPresetName.buffer(), fPendingBankName.buffer());
+            _fallbackToDefaultStateOfPreset();
+            _fallbackToDefaultStateOfBank();
+        }
+
+        // Reset flags after validation
+        fPresetNameStateChecked = false;
+        fBankNameStateChecked = false;
     }
 }
 
