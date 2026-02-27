@@ -188,12 +188,31 @@ void CCetoneUI::_updateState(const char* newPresetName, const char* newBankName,
     this->setState(STATE_PRESET_NAME, newPresetName);
     this->setState(STATE_PRESET_BANK, newBankName);
     this->setState(STATE_PRESET_MODIFIED, isModified ? "true" : "false");
+
+    // Request host to mark project as dirty and enable undo, since preset state has changed
+    _triggerDummyParameterChange();
 }
 
 void CCetoneUI::_updateState(bool isModified)
 {
     this->fPresetIsModified = isModified;
     this->setState(STATE_PRESET_MODIFIED, isModified ? "true" : "false");
+
+    // NOTE: This function overload is only invoked in widget callbacks when parameters are changed by user interaction,
+    //       so we don't need to call _requestParameterChange() here to trigger host undo, because host already knows parameters are changed
+    //       when we dialing parameters.
+}
+
+void CCetoneUI::_triggerDummyParameterChange()
+{
+    // Notify host that parameters have been changed by current preset, so that host can mark project as dirty and enable undo.
+    // This is needed when updating states from UI side, because hosts like REAPER won't active undo if we only call setState()
+    // without any parameter change, even when the preset name and modified state are updated.
+    
+    // Attempt to trigger parameter change by calling editParameter with a dummy parameter ID and no actual change.
+    // This should be enough to notify host about the change of preset state, without causing any side effect on actual parameters.
+    editParameter(0, true);
+    editParameter(0, false);
 }
 
 bool CCetoneUI::_validatePresetAndBankState(const String& presetName, const String& bankName)
@@ -262,6 +281,9 @@ void CCetoneUI::_fallbackToDefaultStateOfPreset()
     fPresetIsModified  = true; // Parameters no longer match any saved preset
     setState(STATE_PRESET_NAME,     DEFAULT_PRESET_NAME);
     setState(STATE_PRESET_MODIFIED, "true");
+
+    // Request host to mark project as dirty and enable undo, since preset state has reset to default
+    _triggerDummyParameterChange();
 }
 
 void CCetoneUI::_fallbackToDefaultStateOfBank()
@@ -274,4 +296,7 @@ void CCetoneUI::_fallbackToDefaultStateOfBank()
     fPresetIsModified  = true; // Parameters no longer match any saved preset
     setState(STATE_PRESET_BANK,     FACTORY_BANK_NAME);
     setState(STATE_PRESET_MODIFIED, "true");
+
+    // Request host to mark project as dirty and enable undo, since preset state has reset to default
+    _triggerDummyParameterChange();
 }
