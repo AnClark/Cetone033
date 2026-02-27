@@ -136,6 +136,12 @@ private:
     // -------------------------------------------------------------------
     // Preset Manager Stuff
 
+    // UI Elements
+    void _handlePresetModalPopupRequests(); // Handle the opening of preset management modal popups based on the corresponding event flags
+                                            // (e.g. requestRenamePresetPopup)
+    void _buildPresetManagementMenu(); // Build the preset management menu (the one that opens when clicking the preset name in the toolbar)
+    void _buildPresetManagementPopups(); // Build the preset management modal popups (e.g. rename preset popup, save preset popup, etc.)
+
     // Which bank to operate on in file browser / bank management popups
     std::string _fileBrowserBankName;
 

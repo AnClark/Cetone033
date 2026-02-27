@@ -49,6 +49,7 @@ dpf_add_plugin (${PROJECT_NAME}
         src/Widgets/ImGui_UI.cpp
         src/Widgets/ImGui_UI_MessageBox.cpp
         src/Widgets/ImGui_UI_FileBrowser.cpp
+        src/Widgets/ImGui_UI_PresetManager.cpp
         src/PresetManager.cpp
         src/PresetManagerHelper.cpp
     FILES_COMMON
