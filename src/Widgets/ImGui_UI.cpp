@@ -1,5 +1,4 @@
 #include "ImGui_UI.hpp"
-#include "DistrhoPluginInfo.h"
 
 #include "structures.h"
 #include "defines.h"
@@ -8,41 +7,6 @@
 
 void ImGuiUI::onImGuiDisplay()
 {
-    double scaleFactor = getScaleFactor() * userScaling;
-    const double initialSize = 500 * scaleFactor;
-
-    //
-    // "About" Window
-    //
-    {
-        ImGui::SetNextWindowPos(ImVec2(initialSize / 6, initialSize / 16), ImGuiCond_Once);
-        ImGui::SetNextWindowSize(ImVec2(500, 220 - 2), ImGuiCond_Once);
-
-        if (isAboutWindowOpen)
-        {
-            ImGui::Begin("About " DISTRHO_PLUGIN_NAME, &isAboutWindowOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
-            {
-                ImGui::SeparatorText(DISTRHO_PLUGIN_NAME);
-
-                ImGui::Text("Monophonic Chiptune synthesizer, by Neotec Software.");
-                ImGui::SameLine(0, 80 - 8);
-                if (ImGui::Button("OK", ImVec2(80, 0)))
-                    isAboutWindowOpen = false;    
-
-                ImGui::Text("Copyright © 2007, Neotec Software.");
-                ImGui::Text("Copyright © 2024-2025, AnClark Liu <clarklaw4701@qq.com>.");
-
-                ImGui::SeparatorText("Authors");
-                ImGui::BulletText("René 'Neotec' Jeschke - Original developer");
-                ImGui::BulletText("AnClark Liu - Ported to DPF, Further developments");
-
-                ImGui::SeparatorText("License");
-                ImGui::BulletText("This project is licensed under GNU General Public License, version 3.");
-            }
-            ImGui::End(); 
-        }
-    }
-
     //
     // Handle message box queue.
     //

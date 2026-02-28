@@ -70,6 +70,8 @@ private:
     ScopedPointer<ImGuiUI> fImGuiInstance;
     friend class ImGuiUI;
 
+    ScopedPointer<ImGuiAboutWindow> fImGuiAboutWindow;
+
     // -------------------------------------------------------------------
     // Image resources
 

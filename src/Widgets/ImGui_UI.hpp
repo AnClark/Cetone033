@@ -41,7 +41,8 @@ public:
     // ----------------------------------------------------------------
     // Window states
 
-    bool isAboutWindowOpen = false; // "About" window visibility flag
+    //bool isAboutWindowOpen = false; // "About" window visibility flag
+                                      // NOTE: Now "About" window is standalone. This is no longer required.
 
     // ----------------------------------------------------------------
     // Parameter menu stuff
@@ -169,4 +170,17 @@ private:
     DGL_NAMESPACE::FileBrowserHandle _fileBrowserHandle = nullptr; // Handle for the active file browser dialog (nullptr if no dialog is open)
     FileBrowserAction                _fileBrowserAction = kFileBrowserNone; // Action flag to determine what to do
     void                             _handleFileBrowserIdle(); // Handles the idle state of the file browser
+};
+
+class ImGuiAboutWindow : public ImGuiStandaloneWindow {
+    double userScaling   = 1.0f;  // User scaling factor for UI elements
+    bool   _pendingHide  = false; // Deferred close flag: set in onImGuiDisplay(), consumed in idleCallback() via close()
+public:
+    ImGuiAboutWindow(TopLevelWidget* tlw);
+
+protected:
+    void onImGuiDisplay() override;
+
+    // Override idleCallback to consume _pendingHide safely outside the render path.
+    void idleCallback() override;
 };

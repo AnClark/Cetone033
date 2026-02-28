@@ -47,6 +47,7 @@ dpf_add_plugin (${PROJECT_NAME}
         src/Fonts/CetoneFonts.cpp 
         dpf-widgets/opengl/DearImGui.cpp
         src/Widgets/ImGui_UI.cpp
+        src/Widgets/ImGui_UI_AboutWindow.cpp
         src/Widgets/ImGui_UI_MessageBox.cpp
         src/Widgets/ImGui_UI_FileBrowser.cpp
         src/Widgets/ImGui_UI_PresetManager.cpp

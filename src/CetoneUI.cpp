@@ -66,6 +66,7 @@ CCetoneUI::CCetoneUI()
 
     /* ImGui instance (popup menus, subwindows, etc.) */
     fImGuiInstance = new ImGuiUI(getTopLevelWidget(), this);
+    fImGuiAboutWindow = new ImGuiAboutWindow(getTopLevelWidget());
 
     /* "About" button (by clicking the plugin logo) */
     _createHiddenButton(fBtnAbout, BTN_ABOUT, Size<uint>(80, 25), Point<int>(0, 0));
@@ -235,7 +236,8 @@ void CCetoneUI::imageButtonClicked(ImageButton* button, int)
     {
         case BTN_ABOUT:
         {
-            fImGuiInstance->isAboutWindowOpen = !fImGuiInstance->isAboutWindowOpen;
+            //fImGuiInstance->isAboutWindowOpen = !fImGuiInstance->isAboutWindowOpen;
+            fImGuiAboutWindow->runAsModal(true);
             break;
         }
         case pOsc1Wave:
