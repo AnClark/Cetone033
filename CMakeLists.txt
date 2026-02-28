@@ -11,6 +11,22 @@ set (CMAKE_CXX_STANDARD 17)
 # Option to enable polyphony mode
 option (CETONE_ENABLE_POLYPHONY "Enable polyphonic mode (16 voices)" ON)
 option (CETONE_ALLOW_VOLUME_BOOSTING "Allow volume boosting when polyphony is enabled.\nThis enables output normalization as well, in order to prevent overflow." ON)
+option (CETONE_BUILD_JACK_STANDALONE "Build JACK standalone application on supported platforms (if JACK is installed)" OFF)
+
+if (CETONE_BUILD_JACK_STANDALONE)
+    find_package (PkgConfig REQUIRED)
+endif ()
+
+# Only build standalone (JACK) application if JACK is installed on system
+if (CETONE_BUILD_JACK_STANDALONE)
+    pkg_check_modules (JACK IMPORTED_TARGET REQUIRED jack)
+    if (JACK_FOUND)
+        message (STATUS "JACK found. Will build standalone application.")
+        set (JACK_TARGET jack)
+    else ()
+        message (STATUS "JACK not found. Skipping standalone application.")
+    endif ()
+endif ()
 
 add_subdirectory (dpf)
 
@@ -33,7 +49,7 @@ if (CETONE_ENABLE_POLYPHONY)
 endif()
 
 dpf_add_plugin (${PROJECT_NAME}
-    TARGETS vst2 vst3 lv2 clap jack
+    TARGETS vst2 vst3 lv2 clap ${JACK_TARGET}
     FILES_DSP
         src/Cetone033.cpp
         src/Cetone033DPF.cpp
