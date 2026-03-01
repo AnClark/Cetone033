@@ -6,7 +6,7 @@ Sadly, Cetone Synth series had been discontinued for more than 12 years (since 2
 
 **But now, I (AnClark) brings it to life again, by re-implementing those plugins to [DISTRHO Plugin Framework](https://distrho.github.io/DPF/).** It now runs well on most modern platforms, with advanced features and multi-format support.
 
-Original Cetone033 is a monophonic synthesizer. Now I implemented polyphony support, and this version supports up to 16 voices.
+The original Cetone033 was a monophonic synthesizer. Now I implemented **polyphony support**, and this version supports up to 16 voices.
 
 ![Screenshot of Cetone033](Screenshot.png)
 
@@ -26,7 +26,7 @@ Original Cetone033 is a monophonic synthesizer. Now I implemented polyphony supp
 - **Cross-platform**
   - Supports: Windows, macOS, Linux
 - **Multi-format**
-  - Provides: VST 2.4, VST3, LV2, CLAP, Standalone (JACK only)
+  - Provides: VST 2.4, VST3, LV2, CLAP, Standalone ([JACK](https://jackaudio.org/) only)
 - **Preset manager**
   - Save and load presets in JSON format
   - Preset manager menu with bank and program support
@@ -73,10 +73,10 @@ pacman -S git
 
 ```bash
 # Source tree has 1 submodule: DPF. So you need to add --recursive
-git clone https://github.com/AnClark/Minaton-XT.git minaton --recursive
+git clone https://github.com/AnClark/Cetone033.git cetone033 --recursive
 
 # If you forget --recursive, run this
-cd minaton
+cd cetone033
 git submodule update --init --recursive
 ```
 
@@ -87,7 +87,7 @@ Cetone series now use CMake as build system. **All platforms share the same comm
 You can explicitly specify built type here. For best performance, `Release` build is recommended. Optionally you can also set build type to `Debug`.
 
 ```bash
-cd minaton
+cd cetone033
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -GNinja    # If you want to use Ninja
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release            # If you are not using Ninja. On Msys2, CMake uses Ninja by default
 cmake --build build
@@ -103,6 +103,7 @@ You can also specify some build options to enable or disable features (via `-D` 
 | --- | --- | --- |
 | `CETONE_ENABLE_POLYPHONY` | Enable polyphony support. If disabled, plugin will be monophonic, which is original Cetone033's behavior. | `ON` |
 | `CETONE_ALLOW_VOLUME_BOOSTING` | Allow volume boosting when polyphony is enabled.<br>This enables output normalization as well, in order to prevent overflow. | `ON` |
+| `CETONE_BUILD_JACK_STANDALONE` | Build standalone version with [JACK](https://jackaudio.org/) support. | `OFF` |
 
 ## Notices about Polyphony and Presets
 
