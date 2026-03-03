@@ -105,4 +105,3 @@ constexpr auto STATE_COUNT = 3;
 static const char* STATE_PRESET_NAME = "presetName";
 static const char* STATE_PRESET_MODIFIED = "presetModified";
 static const char* STATE_PRESET_BANK = "presetBank";          // Which bank the preset comes from
-#define DEFAULT_PRESET_NAME "Init Patch"
