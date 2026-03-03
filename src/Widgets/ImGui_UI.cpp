@@ -263,7 +263,6 @@ void ImGuiUI::_triggerParamUpdate(uint32_t paramId, float newValue)
     // Mark preset as modified when any parameter is changed
     if (!ui->fPresetIsModified)
     {
-        ui->fPresetIsModified = true;
-        ui->setState(STATE_PRESET_MODIFIED, "true");
+        ui->_updateState(true);
     }
 }

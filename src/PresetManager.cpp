@@ -54,7 +54,7 @@ inline int clampi(int value, int min, int max) {
 }  // anonymous namespace
 
 // Default program data (refered to CCetone033::InitParameters())
-static const FactoryProgram DefaultProgram = {
+static const UserProgram DefaultProgram = {
     DEFAULT_PRESET_NAME,  // Name
 
     {0, -12},  // Coarse (Osc1: 0 semitones, Osc2: -12 semitones / -1 octave)
@@ -72,12 +72,17 @@ static const FactoryProgram DefaultProgram = {
 
     1.0f,  // Cutoff
     0.0f,  // Resonance
+    FILTER_TYPE_BIQUAD,
 
     false,  // GlideState
     0.01f,  // GlideSpeed
 
     false,  // ClipState
     1.0f,   // MainVolume (internal value, 0-2 range)
+
+#ifdef ENABLE_POLYPHONY
+	16, // MaxPolyphony
+#endif
 };
 
 void CPresetManager::initFactoryPrograms() {
@@ -362,8 +367,7 @@ bool CPresetManager::deserializeBankFromJSON(const String& jsonString,
         }
 
         for (const auto& presetJson : j["presets"]) {
-            SynthProgram preset;
-            memset(&preset, 0, sizeof(SynthProgram));
+            SynthProgram preset(DefaultProgram); // Start with defaults in case some fields are missing
 
             // Name
             if (presetJson.contains("name")) {
