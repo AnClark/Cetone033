@@ -367,8 +367,7 @@ bool CPresetManager::deserializeBankFromJSON(const String& jsonString,
         }
 
         for (const auto& presetJson : j["presets"]) {
-            SynthProgram preset;
-            memset(&preset, 0, sizeof(SynthProgram));
+            SynthProgram preset(DefaultProgram); // Start with defaults in case some fields are missing
 
             // Name
             if (presetJson.contains("name")) {
