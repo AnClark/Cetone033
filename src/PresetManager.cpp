@@ -376,8 +376,8 @@ bool CPresetManager::deserializeBankFromJSON(const String& jsonString,
                 preset.Name[127] = '\0';
             } else {
                 d_stderr("deserializeBankFromJSON: Preset missing name. Will specify a fallback name");
-                strncpy(preset.Name, PRESET_NO_NAME_FALLBACK, 63);
-                preset.Name[63] = '\0';
+                strncpy(preset.Name, PRESET_NO_NAME_FALLBACK, 127);
+                preset.Name[127] = '\0';
             }
 
             // Oscillator 1
@@ -546,6 +546,22 @@ bool CPresetManager::deserializePresetFromJSON(const String& jsonString,
         if (version != "1.0.0") {
             d_stderr("deserializePresetFromJSON: Unsupported version %s",
                      version.c_str());
+        }
+
+        // Detect if this is actually a bank file, not a single preset
+        if (j.contains("bankName") || j.contains("presets")) {
+            d_stderr("deserializePresetFromJSON: This is a bank file, not a single preset. Use importBankFromFile() instead.");
+            return false;
+        }
+
+        // Validate presetType field if present
+        if (j.contains("presetType")) {
+            std::string presetType = j["presetType"].get<std::string>();
+            if (presetType != "singlePreset") {
+                d_stderr("deserializePresetFromJSON: Invalid presetType '%s', expected 'singlePreset'",
+                         presetType.c_str());
+                return false;
+            }
         }
 
         // Initialize preset
