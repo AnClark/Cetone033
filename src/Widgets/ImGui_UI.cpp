@@ -6,6 +6,12 @@
 
 #include "CetoneUI.hpp" // For class CCetoneUI
 
+#ifdef ENABLE_POLYPHONY
+static const char* SYNTH_TYPE_STRING = "Polyphonic";
+#else
+static const char* SYNTH_TYPE_STRING = "Monophonic";
+#endif
+
 void ImGuiUI::onImGuiDisplay()
 {
     double scaleFactor = getScaleFactor() * userScaling;
@@ -24,13 +30,13 @@ void ImGuiUI::onImGuiDisplay()
             {
                 ImGui::SeparatorText(DISTRHO_PLUGIN_NAME);
 
-                ImGui::Text("Monophonic Chiptune synthesizer, by Neotec Software.");
-                ImGui::SameLine(0, 80 - 8);
+                ImGui::Text("%s chiptune and bassline synthesizer, by Neotec Software.", SYNTH_TYPE_STRING);
+                ImGui::SameLine(ImGui::GetWindowWidth() - 80 - 8, 0);
                 if (ImGui::Button("OK", ImVec2(80, 0)))
                     isAboutWindowOpen = false;    
 
                 ImGui::Text("Copyright © 2007, Neotec Software.");
-                ImGui::Text("Copyright © 2024-2025, AnClark Liu <clarklaw4701@qq.com>.");
+                ImGui::Text("Copyright © 2024-2026, AnClark Liu <clarklaw4701@qq.com>.");
 
                 ImGui::SeparatorText("Authors");
                 ImGui::BulletText("René 'Neotec' Jeschke - Original developer");
