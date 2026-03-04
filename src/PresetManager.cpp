@@ -376,8 +376,8 @@ bool CPresetManager::deserializeBankFromJSON(const String& jsonString,
                 preset.Name[127] = '\0';
             } else {
                 d_stderr("deserializeBankFromJSON: Preset missing name. Will specify a fallback name");
-                strncpy(preset.Name, PRESET_NO_NAME_FALLBACK, 63);
-                preset.Name[63] = '\0';
+                strncpy(preset.Name, PRESET_NO_NAME_FALLBACK, 127);
+                preset.Name[127] = '\0';
             }
 
             // Oscillator 1
