@@ -16,8 +16,8 @@ jobs:
           submodules: recursive
       - name: Install dependencies
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -yqq libgl1-mesa-dev
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends build-essential cmake
 
       - name: Build plugins
         run: |
@@ -63,13 +63,13 @@ jobs:
           submodules: recursive
       - name: Install dependencies
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -yqq binutils-mingw-w64-x86-64 g++-mingw-w64-x86-64 mingw-w64 wine-stable
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends build-essential cmake binutils-mingw-w64-x86-64 g++-mingw-w64-x86-64 mingw-w64 wine-stable
       - name: Deal with File does not contain a valid CIL image error
         run: |
           # See: https://github.com/orgs/community/discussions/64826 for more details.
           sudo apt remove --purge --auto-remove mono-runtime
-          sudo apt-get install wine-binfmt
+          sudo apt-get install -y --no-install-recommends wine-binfmt
 
       - name: Build win64 cross-compiled plugins
         env:
