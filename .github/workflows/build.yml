@@ -14,6 +14,18 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+
+      - name: Explicitly install ccache to avoid error on ccache-action
+        run: |
+          sudo apt-get update -yq
+          sudo apt-get install -yq ccache
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ matrix.os }}-${{ matrix.type }}-ccache
+          max-size: 2G
+
       - name: Install dependencies
         run: |
           sudo apt-get update -y
@@ -21,8 +33,14 @@ jobs:
 
       - name: Build plugins
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           make -C build -j $(nproc)
+
+      - name: Show ccache stats
+        run: ccache -s
 
       - name: Set sha8 (non-release)
         if: startsWith(github.ref, 'refs/tags/') != true
@@ -61,6 +79,15 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: Explicitly install ccache to avoid error on ccache-action
+        run: |
+          sudo apt-get update -yq
+          sudo apt-get install -yq ccache
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ matrix.os }}-${{ matrix.type }}-ccache
+          max-size: 2G
       - name: Install dependencies
         run: |
           sudo apt-get update -y
@@ -83,8 +110,15 @@ jobs:
           echo "SET(CMAKE_CXX_COMPILER /usr/bin/x86_64-w64-mingw32-g++)" >> windows-cross-build.cmake
           echo "SET(CMAKE_RC_COMPILER /usr/bin/x86_64-w64-mingw32-windres)" >> windows-cross-build.cmake
           echo "SET(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32/)" >> windows-cross-build.cmake
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=windows-cross-build.cmake
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_TOOLCHAIN_FILE=windows-cross-build.cmake
           make -C build -j $(nproc)
+
+      - name: Show ccache stats
+        run: ccache -s
 
       - name: Set sha8 (non-release)
         if: startsWith(github.ref, 'refs/tags/') != true
