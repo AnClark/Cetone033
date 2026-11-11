@@ -14,18 +14,17 @@ static const char* SYNTH_TYPE_STRING = "Monophonic";
 
 void ImGuiUI::onImGuiDisplay()
 {
-    double scaleFactor = getScaleFactor() * userScaling;
-    const double initialSize = 500 * scaleFactor;
-
     //
     // "About" Window
     //
     {
-        ImGui::SetNextWindowPos(ImVec2(initialSize / 6, initialSize / 16), ImGuiCond_Once);
-        ImGui::SetNextWindowSize(ImVec2(500, 220 - 2), ImGuiCond_Once);
-
         if (isAboutWindowOpen)
         {
+            const auto scaleFactor = getScaleFactor();
+
+            ImGui::SetNextWindowPos(ImVec2(100, 60 - 2) / scaleFactor, ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(500, 220 - 2), ImGuiCond_Once);
+
             ImGui::Begin("About " DISTRHO_PLUGIN_NAME, &isAboutWindowOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
             {
                 ImGui::SeparatorText(DISTRHO_PLUGIN_NAME);
