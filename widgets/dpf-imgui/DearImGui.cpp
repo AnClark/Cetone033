@@ -110,8 +110,20 @@ struct ImGuiWidget<BaseWidget>::PrivateData {
         io.IniFilename = nullptr;
         io.LogFilename = nullptr;
 
+        // NOTE: About Dear ImGui scaling
+        // If we enable kInternalScalingMatchingHost in UI's constructor, like this:
+        //
+        //    MyPluginUI::MyPluginUI()
+        //      : DISTRHO::UI(<UI_WIDTH>, <UI_HEIGHT>, kInternalScalingMatchingHost)
+        //
+        // then DGL can automatically scale Dear ImGui UI, without explicitly specify
+        // scale factors. So, the call to ImGui::GetStyle().ScaleAllSizes() is NO LONGER
+        // required; invoking this causes only SIDE EFFECTS (e.g. thicker buttons and
+        // menu items).
+       #if 0    // <- Bypassed. No need to invoke this any more.
         ImGuiStyle& style(ImGui::GetStyle());
         style.ScaleAllSizes(scaleFactor);
+       #endif
 
        #ifndef DGL_NO_SHARED_RESOURCES
         using namespace dpf_resources;
