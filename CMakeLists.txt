@@ -22,11 +22,15 @@ if (CETONE_BUILD_JACK_STANDALONE)
     set (JACK_TARGET jack)
 endif ()
 
+# Generate dynamic metadata file
+configure_file (cmake/metadata.h.in ${PROJECT_BINARY_DIR}/metadata.gen.h @ONLY)
+
 add_subdirectory (dpf)
 
 include_directories (   
     src/
     widgets/dpf-imgui/
+    ${PROJECT_BINARY_DIR}
 )
 
 set (SRC_BACKEND
