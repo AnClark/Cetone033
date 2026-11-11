@@ -37,3 +37,6 @@ compile_commands.json
 *.exe
 *.out
 *.app
+
+# macOS stuff
+*DS_Store*
