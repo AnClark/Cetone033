@@ -27,7 +27,12 @@ void ImGuiUI::onImGuiDisplay()
 
             ImGui::Begin("About " DISTRHO_PLUGIN_NAME, &isAboutWindowOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
             {
-                ImGui::SeparatorText(DISTRHO_PLUGIN_NAME);
+                const String versionStr = String(DISTRHO_PLUGIN_NAME) + "  |  Version " +
+                                        String(PLUGIN_VERSION_MAJOR) + "." +
+                                        String(PLUGIN_VERSION_MINOR) + "." +
+                                        String(PLUGIN_VERSION_PATCH);
+
+                ImGui::SeparatorText(versionStr);
 
                 ImGui::Text("%s chiptune and bassline synthesizer, by Neotec Software.", SYNTH_TYPE_STRING);
                 ImGui::SameLine(ImGui::GetWindowWidth() - 80 - 8, 0);
