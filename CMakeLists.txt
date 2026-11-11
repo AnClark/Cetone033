@@ -19,13 +19,7 @@ endif ()
 
 # Only build standalone (JACK) application if JACK is installed on system
 if (CETONE_BUILD_JACK_STANDALONE)
-    pkg_check_modules (JACK IMPORTED_TARGET REQUIRED jack)
-    if (JACK_FOUND)
-        message (STATUS "JACK found. Will build standalone application.")
-        set (JACK_TARGET jack)
-    else ()
-        message (STATUS "JACK not found. Skipping standalone application.")
-    endif ()
+    set (JACK_TARGET jack)
 endif ()
 
 add_subdirectory (dpf)
