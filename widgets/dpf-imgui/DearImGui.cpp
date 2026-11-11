@@ -502,7 +502,11 @@ bool ImGuiWidget<BaseWidget>::onMotion(const Widget::MotionEvent& event)
     ImGuiIO& io(ImGui::GetIO());
     imData->handleModifiers(io, event.mod);
 
-    io.AddMousePosEvent(event.pos.getX(), event.pos.getY());
+    // Scale DGL mouse position to Dear ImGui's internal coordinates.
+    // DGL's mouse coordinates scale by DPI, while Dear ImGui not. Simply divide DGL's X/Y axis by scale factor
+    // so that we can interactive with Dear ImGui widgets properly.
+    // NOTE: imData->scaleFactor is set internally by Dear ImGui.
+    io.AddMousePosEvent(event.pos.getX() / imData->scaleFactor, event.pos.getY() / imData->scaleFactor);
     return false;
 }
 
