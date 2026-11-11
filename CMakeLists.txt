@@ -26,7 +26,7 @@ add_subdirectory (dpf)
 
 include_directories (   
     src/
-    dpf-widgets/opengl/
+    widgets/dpf-imgui/
 )
 
 set (SRC_BACKEND
@@ -55,7 +55,7 @@ dpf_add_plugin (${PROJECT_NAME}
         src/CetoneUIHelper.cpp
         src/images/CetoneArtwork.cpp
         src/Fonts/CetoneFonts.cpp 
-        dpf-widgets/opengl/DearImGui.cpp
+        widgets/dpf-imgui/DearImGui.cpp
         src/Widgets/ImGui_UI.cpp
         src/Widgets/ImGui_UI_MessageBox.cpp
         src/Widgets/ImGui_UI_FileBrowser.cpp
