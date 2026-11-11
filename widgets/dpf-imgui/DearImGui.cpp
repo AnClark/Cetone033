@@ -18,9 +18,6 @@
 #include "DearImGui.hpp"
 #include "Application.hpp"
 
-// AnClark MOD: Do not include DPF shared fonts
-#define DGL_NO_SHARED_RESOURCES 1
-
 #ifndef DGL_NO_SHARED_RESOURCES
 # include "src/Resources.hpp"
 #endif
@@ -134,9 +131,10 @@ struct ImGuiWidget<BaseWidget>::PrivateData {
         fc.PixelSnapH = true;
         io.Fonts->AddFontFromMemoryTTF((void*)dejavusans_ttf,
                                        dejavusans_ttf_size,
-                                       d_roundToIntPositive(fontSize * scaleFactor),
+                                       d_roundToIntPositive(fontSize),  // Dear ImGui handles font scale internally. No need to scale ourselves.
                                        &fc);
-        io.Fonts->Build();
+        // Now we have new Dear ImGui OpenGL2 backend. No need to call Build(). See imgui_draw.cpp:2823.
+        // io.Fonts->Build();
        #endif
 
         io.GetClipboardTextFn = GetClipboardTextFn;
